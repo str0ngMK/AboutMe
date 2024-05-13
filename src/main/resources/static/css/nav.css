@@ -1,0 +1,12 @@
+@charset "UTF-8";
+
+.navbar {
+	position: absolute;
+	z-index: 1;
+	left: 0px;
+	right: 0px;
+}
+
+.container {
+	padding-top: 100px;
+}
