@@ -14,7 +14,7 @@
 <style>
 #box {
 	max-width: 100%;
-	min-width: 476px;
+	min-width: 200px;
 	height: calc(100vh - 180px);
 	min-height: 300px;
 	background: gray;
@@ -39,14 +39,14 @@
 	display: flex;
 }
 
-.card {
+#profile {
 	max-width: 18rem;
 	min-width: 165px;
 	overflow: hidden;
 }
 
 @media screen and (max-width: 992px) {
-	.card-body {
+	#profile-body {
 		height: 150px;
 		overflow: hidden;
 		white-space: nowrap;
@@ -58,7 +58,7 @@
 }
 
 @media screen and (max-width: 767px) {
-	.card {
+	#profile {
 		display: none;
 	}
 }
@@ -66,6 +66,11 @@
 .card-text {
 	text-overflow: ellipsis;
 }
+
+/* .chatText {
+	display: inline-block;
+	white-space: nowrap;
+} */
 
 
 
@@ -96,9 +101,9 @@
 	<div class="container">
 		<div class="row">
 			<div class="col-md-3">
-				<div class="card">
+				<div class="card" id="profile">
 					<img src="img/java.png" class="card-img-top" alt="...">
-					<div class="card-body">
+					<div class="card-body" id="profile-body">
 						<h5 class="card-title">강민경</h5>
 						<p class="card-text">Some quick example text to build on the
 							card title and make up the bulk of the card's content.</p>
@@ -121,6 +126,9 @@
       integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
       crossorigin="anonymous"></script> -->
 <script>
+	let globalChapter;
+	let globalChoice;
+
 	function start(){
 		let box = document.getElementById('box');
 		let btn = document.getElementById('btn');
@@ -132,8 +140,29 @@
 		// chapter_2(box);
 	}
 
+	function typingAnswer(chapter, choice, message){
+		globalChapter = chapter;
+		globalChoice = choice;
+
+		// 요소 삭제
+		let question = document.getElementById('question');
+		while(question.firstChild){
+			question.removeChild(question.firstChild);
+		}
+		// 메세지 입력
+		let chatInput = document.getElementById('chatInput');
+		chatInput.value = message;
+	}
+
+	function postAnswer(){
+		console.log('chapter: ', globalChapter);
+		console.log('choice: ', globalChoice);
+	}
+
 	function cahpter_1(box){
 		createChatBox(box);
+		createAnswerBox();
+		createQuestionBox();
 		createInputBox(box);
 
 		function createChatBox(box){
@@ -141,7 +170,8 @@
 			row.className = 'row';
 
 			let col = document.createElement('div');
-			col.className = 'col-md-12';
+			// col.className = 'col-md-12';
+			col.className = 'col';
 
 			let div = document.createElement('div');
 			div.id = 'chatBox';
@@ -149,15 +179,54 @@
 			div.style.width = '100%';
 			div.style.minHeight = '260px';
 			div.style.height = 'calc(100vh - 220px)';
+			div.style.display = 'flex';
+			div.style.flexDirection = 'column';
+			div.style.justifyContent = 'space-between';
+
 
 			col.appendChild(div);
 			row.appendChild(col);
 			box.appendChild(row);
 		}
 
+		function createAnswerBox(){
+			let chatBox = document.getElementById('chatBox');
+			let answerRow = document.createElement('div');
+			answerRow.className = 'row';
+
+			let answerCol = document.createElement('div');
+			answerCol.className = 'col-md-6';
+
+			let div = document.createElement('div');
+			div.id = 'answer';
+
+			answerCol.appendChild(div);
+			answerRow.appendChild(answerCol);
+			chatBox.appendChild(answerRow);
+		}
+
+		function createQuestionBox(){
+			let chatBox = document.getElementById('chatBox');
+			let questionRow = document.createElement('div');
+			questionRow.className = 'row';
+
+			let questionCol = document.createElement('div');
+			questionCol.className = 'col';
+
+			let div = document.createElement('div');
+			div.id = 'question';
+			div.style.display ='flex';
+			div.style.flexDirection = 'column';
+			
+			questionCol.appendChild(div);
+			questionRow.appendChild(questionCol);
+			chatBox.appendChild(questionRow);
+		}
+
 		function createInputBox(box){
 			let row = document.createElement('div');
 			row.className = 'row justify-content-center';
+			// row.id = 'chatInput';
 
 			let col = document.createElement('div');
 			col.className = 'col-md-12';
@@ -166,10 +235,12 @@
 			div.className = 'input-group';
 
 			let input = document.createElement('input');
+			input.id = 'chatInput';
 			input.type = 'text';
 			input.className = 'form-control';
 			input.placeholder = "메시지 전송";
 			// input.setAttribute('aria-label', "Recipient's username");
+			input.style.pointerEvents = 'none';
 			input.setAttribute('aria-describedby', 'button-addon2');
 
 			let button = document.createElement('button');
@@ -177,6 +248,9 @@
 			button.className = 'btn btn-outline-secondary';
 			button.id = 'button-addon2';
 			button.textContent = '전송';
+			button.onclick = function() {
+				postAnswer();
+			}
 
 			div.appendChild(input);
 			div.appendChild(button);
@@ -185,12 +259,41 @@
 			box.appendChild(row);
 		}
 
-		fetch('/chat/ask')
+		fetch('/chat/ask?num=1')
 		.then(response => {
 			return response.json();
 		})
 		.then(data => {
-			console.log(data);
+			let answerBox = document.getElementById('answer');
+			let questionBox = document.getElementById('question');
+			
+			const answer = data.answer;
+			const question = data.question;
+			
+			// 답변 생성
+			answer.forEach(element => {
+				let card = document.createElement('div');
+				card.className = 'card';
+
+				let cardBody = document.createElement('div');
+				cardBody.className = 'card-body';
+				cardBody.textContent = element.message;
+				
+				card.appendChild(cardBody);
+				answerBox.appendChild(card);
+			});
+			
+			// 질문 생성
+			question.forEach(element => {
+				let btn = document.createElement('button');
+				btn.className = 'btn btn-light'
+				btn.type = 'button';
+				btn.textContent = element.message;
+				btn.onclick = function() {
+					typingAnswer(element.chapter, element.choice ,element.message);
+				}
+				questionBox.appendChild(btn);
+			})
 		})
 		.catch(error => {
 			console.error('Error:', error);
@@ -198,7 +301,7 @@
 
 	}
 
-	function chapter_2(box){
+	function typingText(box){
 		let createDynamic = document.createElement('p');
 		createDynamic.id='dynamic';
 		createDynamic.className='dynamic-text';
