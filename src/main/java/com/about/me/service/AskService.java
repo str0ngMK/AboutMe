@@ -20,10 +20,11 @@ public class AskService {
 	@Autowired
 	private QuestionRepository questionRepository;
 	
-	public Map<String, Object> message(int num) {
+	public Map<String, Object> message(long choice) {
 		Map<String, Object> result = new HashMap<>();
-		List<AnswerEntity> answer = answerRepository.findByChapter(num);
-		List<QuestionEntity> question = questionRepository.findByChapter(num);
+		List<AnswerEntity> answer = answerRepository.findByChapter(choice);
+		choice = answer.get(0).getChoice();
+		List<QuestionEntity> question = questionRepository.findByChapter(choice);
 		result.put("answer", answer);
 		result.put("question", question);
 		return result;

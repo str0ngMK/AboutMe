@@ -21,6 +21,9 @@ public class AnswerEntity {
 	@Column(name = "chapter")
 	private long chapter;
 	
+	@Column(name = "choice")
+	private long choice;
+	
 	@Column(name = "message")
 	private String message;
 	

@@ -10,6 +10,6 @@ import com.about.me.entity.QuestionEntity;
 @Repository
 public interface QuestionRepository extends JpaRepository<QuestionEntity, Long>{
 
-	List<QuestionEntity> findByChapter(int num);
+	List<QuestionEntity> findByChapter(long chapter);
 
 }
