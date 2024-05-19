@@ -1,463 +1,459 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>About Me</title>
-<link
-	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-	rel="stylesheet">
-<link href="https://getbootstrap.com/docs/5.3/assets/css/docs.css"
-	rel="stylesheet">
-<link rel="stylesheet" type="text/css" href="/css/nav.css">
-</head>
-<style>
-body {
-	overflow-x: hidden;
-}
-#box {
-	max-width: 100%;
-	min-width: 200px;
-	height: calc(100vh - 180px);
-	min-height: 300px;
-	background: gray;
-	flex-grow: 1;
-	
-	display: flex;
-	justify-content: center;
-	align-items: center;
-}
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>About Me</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://getbootstrap.com/docs/5.3/assets/css/docs.css" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="/css/nav.css" />
+  </head>
+  <style>
+    body {
+      overflow-x: hidden;
+    }
+    #box {
+      max-width: 100%;
+      min-width: 200px;
+      height: calc(100vh - 180px);
+      min-height: 300px;
+      background: gray;
+      flex-grow: 1;
 
-#chat {
-	max-width: 100%;
-	min-width: 200px;
-	height: calc(100vh - 180px);
-	min-height: 300px;
-	background: white;
-	flex-grow: 1;
-	border: 1px solid gray;
-}
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
 
-.row {
-	display: flex;
-}
+    #chat {
+      max-width: 100%;
+      min-width: 200px;
+      height: calc(100vh - 180px);
+      min-height: 300px;
+      background: white;
+      flex-grow: 1;
+      box-shadow: 0px -1px 5px rgba(0, 0, 0, 0.2);
+    }
 
-#profile {
-	max-width: 18rem;
-	min-width: 165px;
-	overflow: hidden;
-}
+    .row {
+      display: flex;
+    }
 
-@media screen and (max-width: 992px) {
-	#profile-body {
-		height: 150px;
-		overflow: hidden;
-		white-space: nowrap;
-	}
-	.card-text {
-		text-overflow: ellipsis;
-		overflow: hidden;
-	}
-}
+    #profile {
+      max-width: 18rem;
+      min-width: 165px;
+      overflow: hidden;
+    }
 
-@media screen and (max-width: 767px) {
-	#profile {
-		display: none;
-	}
-}
+    @media screen and (max-width: 992px) {
+      #profile-body {
+        height: 150px;
+        overflow: hidden;
+        white-space: nowrap;
+      }
+      .card-text {
+        text-overflow: ellipsis;
+        overflow: hidden;
+      }
+    }
 
-.card-text {
-	text-overflow: ellipsis;
-}
+    @media screen and (max-width: 767px) {
+      #profile {
+        display: none;
+      }
+    }
 
-/* .chatText {
+    .card-text {
+      text-overflow: ellipsis;
+    }
+
+    /* .chatText {
 	display: inline-block;
 	white-space: nowrap;
 } */
 
-
-
-
-.dynamic-text {
-  font-size: 2rem;
-}
-#dynamic {
-  position: relative;
-  display: inline-block;
-}
-#dynamic::after {
-  position: absolute;
-  content: "";
-  display: block;
-  top: 0;
-  right: -10px;
-  width: 3px;
-  height: 100%;
-  background-color: white;
-}
-#dynamic.active::after {
-  display: none;
-}
-</style>
-<body>
-	<nav th:replace="~{nav/nav :: nav}"></nav>
-	<div class="container">
-		<div class="row">
-			<div class="col-md-3">
-				<div class="card" id="profile">
-					<img src="img/java.png" class="card-img-top" alt="...">
-					<div class="card-body" id="profile-body">
-						<h5 class="card-title">강민경</h5>
-						<p class="card-text">Some quick example text to build on the
-							card title and make up the bulk of the card's content.</p>
-						<a href="#" class="btn btn-primary">Go somewhere</a>
-					</div>
-				</div>
-			</div>
-			<div class="col-md-9">
-				<div id="box">
-					<button type="button" id="btn" class="btn btn-outline-light" onclick="start()">시작</button>
-				</div>
-			</div>
-		</div>
-	</div>
-</body>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
-</script>
-<!-- <script
+    .dynamic-text {
+      font-size: 2rem;
+    }
+    #dynamic {
+      position: relative;
+      display: inline-block;
+    }
+    #dynamic::after {
+      position: absolute;
+      content: "";
+      display: block;
+      top: 0;
+      right: -10px;
+      width: 3px;
+      height: 100%;
+      background-color: white;
+    }
+    #dynamic.active::after {
+      display: none;
+    }
+  </style>
+  <body>
+    <nav th:replace="~{nav/nav :: nav}"></nav>
+    <div class="container">
+      <div class="row">
+        <div class="col-md-3">
+          <div class="card" id="profile">
+            <img src="img/java.png" class="card-img-top" alt="..." />
+            <div class="card-body" id="profile-body">
+              <h5 class="card-title">강민경</h5>
+              <p class="card-text">안녕하세요, Back-End 개발자 강민경 입니다. 저의 blog에 오신 것을 환영 합니다.</p>
+              <a href="https://github.com/str0ngMK" target="_blank" rel="noopener noreferrer" class="btn btn-primary"
+                >Go GitHub!</a
+              >
+            </div>
+          </div>
+        </div>
+        <div class="col-md-9">
+          <div id="box">
+            <button type="button" id="btn" class="btn btn-outline-light" onclick="start()">시작</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
       integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
       crossorigin="anonymous"></script> -->
-<script>
-	// let globalChapter = 0;
-	let globalChoice = 0;
-	let hideQuestion = false;
+  <script>
+    // let globalChapter = 0;
+    let globalChoice = 0;
+    let hideQuestion = false;
 
-	function start(){
-		let box = document.getElementById('box');
-		let btn = document.getElementById('btn');
+    function start() {
+      let box = document.getElementById("box");
+      let btn = document.getElementById("btn");
 
-		box.id = 'chat';
-		btn.remove();
+      box.id = "chat";
+      btn.remove();
 
-		createChatBox(box);
-		createAnswerAndQuestion();
-		createInputBox(box);
+      createChatBox(box);
+      createAnswerAndQuestion();
+      createInputBox(box);
 
-		askApi();
-	}
+      askApi();
+    }
 
-	function typingQuestion(chapter, choice, message){
-		// globalChapter = chapter + 1;
-		globalChoice = choice;
+    function typingQuestion(chapter, choice, message) {
+      // globalChapter = chapter + 1;
+      globalChoice = choice;
 
-		// 요소 삭제
-		let question = document.getElementById('question');
-		while(question.firstChild){
-			question.removeChild(question.firstChild);
-		}
+      // 요소 삭제
+      let question = document.getElementById("question");
+      while (question.firstChild) {
+        question.removeChild(question.firstChild);
+      }
 
-		// 메세지 입력
-		let chatInput = document.getElementById('chatInput');
-		chatInput.value = message;
+      // 메세지 입력
+      let chatInput = document.getElementById("chatInput");
+      chatInput.value = message;
 
-		// 버튼 disabled 해제
-		let btn = document.getElementById('button-addon2');
-		btn.disabled = false;
+      // 버튼 disabled 해제
+      let btn = document.getElementById("button-addon2");
+      btn.disabled = false;
 
-		// 메뉴 버튼 변경
-		let menuBtn = document.getElementById('menuBtn');
-		menuBtn.textContent = '≡';
+      // 메뉴 버튼 변경
+      let menuBtn = document.getElementById("menuBtn");
+      menuBtn.textContent = "≡";
+    }
 
-	}
+    function getAsk() {
+      let chatInput = document.getElementById("chatInput");
+      if (chatInput.value !== "") {
+        // 버튼 disabled 적용
+        let btn = document.getElementById("button-addon2");
+        btn.disabled = true;
 
-	function getAsk(){
-		let chatInput = document.getElementById('chatInput');
-		if (chatInput.value !== '') {
-			// 버튼 disabled 적용
-			let btn = document.getElementById('button-addon2');
-			btn.disabled = true;
+        addAnswer(chatInput.value, "q");
+        chatInput.value = null;
 
-			addAnswer(chatInput.value, 'q');
-			chatInput.value = null;
-			
-			askApi();
-		} else {
-			console.log('메세지가 비었음.');
-		}
-	}
+        askApi();
+      } else {
+        console.log("메세지가 비었음.");
+      }
+    }
 
-	function askApi(){
-		fetch('/chat/ask?choice=' + globalChoice)
-		.then(response => {
-			return response.json();
-		})
-		.then(data => {
-			const answer = data.answer;
-			const question = data.question;
-				
-			// 답변 생성
-			answer.forEach(element => {
-				addAnswer(element.message, 'a');
-			});
-				
-			// 질문 생성
-			question.forEach(element => {
-				addQuestion(element);
-			})
-		})
-		.catch(error => {
-			console.error('Error:', error);
-		});
-	}
+    function askApi() {
+      fetch("/chat/ask?choice=" + globalChoice)
+        .then((response) => {
+          return response.json();
+        })
+        .then((data) => {
+          const answer = data.answer;
+          const question = data.question;
 
-	function addAnswer(message, type){
-		let answerBox = document.getElementById('answer');
+          // 답변 생성
+          answer.forEach((element) => {
+            addAnswer(element.message, "a");
+          });
 
-		let row = document.createElement('div');
-		row.className = 'row';
+          // 질문 생성
+          question.forEach((element) => {
+            addQuestion(element);
+          });
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+        });
+    }
 
-		let col = document.createElement('div');
-		col.className = 'col';
+    function addAnswer(message, type) {
+      let answerBox = document.getElementById("answer");
 
-		let card = document.createElement('div');
-		if (type === 'a'){
-			card.className = 'card text-bg-primary';
-			col.style.textAlign = 'left';
-		}
-		if (type === 'q'){
-			card.className = 'card text-bg-light';
-			col.style.textAlign = 'right';
-		}
-		card.style.display = 'inline-block';
+      let row = document.createElement("div");
+      row.className = "row";
 
-		let cardBody = document.createElement('div');
-		cardBody.className = 'card-body';
-		cardBody.textContent = message;
+      let col = document.createElement("div");
+      col.className = "col p-4";
 
-		let time = document.createElement('span');
-		time.textContent = getCurrentTime();
-		time.style.fontSize = 'small';
-		time.style.verticalAlign = 'bottom';
-				
-		card.appendChild(cardBody);
-		col.appendChild(card);
-		col.appendChild(time);
-		row.appendChild(col);
-		answerBox.appendChild(row);
-	}
+      let card = document.createElement("div");
+      if (type === "a") {
+        card.className = "card text-bg-primary";
+        col.style.textAlign = "left";
+      }
+      if (type === "q") {
+        card.className = "card text-bg-light";
+        col.style.textAlign = "right";
+      }
+      card.style.display = "inline-block";
 
-	function getCurrentTime(){
-		let currentTime = new Date();
-		let hours = currentTime.getHours();
-		let minutes = currentTime.getMinutes();
+      let cardBody = document.createElement("div");
+      cardBody.className = "card-body";
+      cardBody.textContent = message;
 
-		if (hours < 10) {
-			hours = "0" + hours;
-		}
-		if (minutes < 10){
-			minutes = "0" + minutes;
-		}
-		return hours + ":" + minutes;
-	}
+      let time = document.createElement("span");
+      time.textContent = getCurrentTime();
+      time.style.fontSize = "small";
+      time.style.verticalAlign = "bottom";
 
-	function addQuestion(element){
-		let questionBox = document.getElementById('question');
+      card.appendChild(cardBody);
+      if (type === "a") {
+        col.appendChild(card);
+        col.appendChild(time);
+      }
+      if (type === "q") {
+        col.appendChild(time);
+        col.appendChild(card);
+      }
+      row.appendChild(col);
+      answerBox.appendChild(row);
+    }
 
-		let row = document.createElement('div');
-		row.className = 'row';
+    function getCurrentTime() {
+      let currentTime = new Date();
+      let hours = currentTime.getHours();
+      let minutes = currentTime.getMinutes();
 
-		let col = document.createElement('div');
-		col.className = 'col-md-12';
+      if (hours < 10) {
+        hours = "0" + hours;
+      }
+      if (minutes < 10) {
+        minutes = "0" + minutes;
+      }
+      return hours + ":" + minutes;
+    }
 
-		let btn = document.createElement('button');
-		btn.className = 'btn btn-light'
-		btn.type = 'button';
-		btn.textContent = element.message;
-		btn.style.width = '100%';
-		btn.onclick = function() {
-			typingQuestion(element.chapter, element.choice ,element.message);
-		}
+    function addQuestion(element) {
+      let questionBox = document.getElementById("question");
 
-		// 메뉴 버튼 변경
-		let menuBtn = document.getElementById('menuBtn');
-		menuBtn.textContent = '∧';
+      let row = document.createElement("div");
+      row.className = "row";
 
-		col.appendChild(btn);
-		row.appendChild(col);
-		questionBox.appendChild(row);
-	}
+      let col = document.createElement("div");
+      col.className = "col-md-12";
 
-	function createChatBox(box){
-		let row = document.createElement('div');
-		row.className = 'row';
+      let btn = document.createElement("button");
+      btn.className = "btn btn-light";
+      btn.type = "button";
+      btn.textContent = element.message;
+      btn.style.width = "100%";
+      btn.onclick = function () {
+        typingQuestion(element.chapter, element.choice, element.message);
+      };
 
-		let col = document.createElement('div');
-		col.className = 'col';
+      // 메뉴 버튼 변경
+      let menuBtn = document.getElementById("menuBtn");
+      menuBtn.textContent = "∧";
 
-		let div = document.createElement('div');
-		div.id = 'chatBox';
-		div.style.width = '100%';
-		div.style.minHeight = '260px';
-		div.style.height = 'calc(100vh - 220px)';
-		div.style.display = 'flex';
-		div.style.flexDirection = 'column';
-		div.style.justifyContent = 'space-between';
+      col.appendChild(btn);
+      row.appendChild(col);
+      questionBox.appendChild(row);
+    }
 
-		col.appendChild(div);
-		row.appendChild(col);
-		box.appendChild(row);
-	}
+    function createChatBox(box) {
+      let row = document.createElement("div");
+      row.className = "row";
 
-	function createAnswerAndQuestion(){
-		let chatBox = document.getElementById('chatBox');
-		let row = document.createElement('div');
-		row.className = 'row';
+      let col = document.createElement("div");
+      col.className = "col";
 
-		let col = document.createElement('div');
-		col.className = 'col-md-12';
-		col.style.position = 'relative';
+      let div = document.createElement("div");
+      div.id = "chatBox";
+      div.style.width = "100%";
+      div.style.minHeight = "260px";
+      div.style.height = "calc(100vh - 220px)";
+      div.style.display = "flex";
+      div.style.flexDirection = "column";
+      div.style.justifyContent = "space-between";
 
-		let answerDiv = document.createElement('div');
-		answerDiv.id = 'answer';
-		answerDiv.style.height = 'calc(-220px + 100vh)';
-		answerDiv.style.minHeight = '260px';
-		answerDiv.style.overflowY = 'auto';
-		answerDiv.style.paddingTop = '10px';
-		answerDiv.style.paddingLeft = '10px';
-		answerDiv.style.paddingRight = '10px';
+      col.appendChild(div);
+      row.appendChild(col);
+      box.appendChild(row);
+    }
 
+    function createAnswerAndQuestion() {
+      let chatBox = document.getElementById("chatBox");
+      let row = document.createElement("div");
+      row.className = "row";
 
-		let questionDiv = document.createElement('div');
-		questionDiv.id = 'question';
-		questionDiv.style.display ='flex';
-		questionDiv.style.flexDirection = 'column';
-		questionDiv.style.position = 'absolute';
-		questionDiv.style.zIndex = '1';
-		questionDiv.style.justifyContent = 'flex-end';
-		questionDiv.style.width = '100%';
-		questionDiv.style.paddingRight = '24px';
-		questionDiv.style.bottom = '0';
+      let col = document.createElement("div");
+      col.className = "col-md-12";
+      col.style.position = "relative";
 
-		col.appendChild(questionDiv);
-		col.appendChild(answerDiv);
-		row.appendChild(col);
-		chatBox.appendChild(row);
-	}
+      let answerDiv = document.createElement("div");
+      answerDiv.id = "answer";
+      answerDiv.style.height = "calc(-220px + 100vh)";
+      answerDiv.style.minHeight = "260px";
+      answerDiv.style.overflowY = "auto";
+      answerDiv.style.overflowX = "hidden";
 
-	function createInputBox(box){
-		let row = document.createElement('div');
-		row.className = 'row justify-content-center';
-		// row.id = 'chatInput';
+      let questionDiv = document.createElement("div");
+      questionDiv.id = "question";
+      questionDiv.style.display = "flex";
+      questionDiv.style.flexDirection = "column";
+      questionDiv.style.position = "absolute";
+      questionDiv.style.zIndex = "1";
+      questionDiv.style.justifyContent = "flex-end";
+      questionDiv.style.width = "100%";
+      questionDiv.style.paddingRight = "24px";
+      questionDiv.style.bottom = "0";
 
-		let col = document.createElement('div');
-		col.className = 'col-md-12';
+      col.appendChild(questionDiv);
+      col.appendChild(answerDiv);
+      row.appendChild(col);
+      chatBox.appendChild(row);
+    }
 
-		let div = document.createElement('div');
-		div.className = 'input-group';
+    function createInputBox(box) {
+      let row = document.createElement("div");
+      row.className = "row justify-content-center";
+      // row.id = 'chatInput';
 
-		let menuBtn = document.createElement('button');
-		menuBtn.id = 'menuBtn';
-		menuBtn.type = 'button';
-		menuBtn.className = 'btn btn-outline-secondary';
-		menuBtn.textContent = '∧';
-		menuBtn.onclick = function() {
-			showOrHiddenQuestion();
-		}
+      let col = document.createElement("div");
+      col.className = "col-md-12";
 
-		let input = document.createElement('input');
-		input.id = 'chatInput';
-		input.type = 'text';
-		input.className = 'form-control';
-		input.placeholder = "메시지 전송";
-		// input.setAttribute('aria-label', "Recipient's username");
-		input.style.pointerEvents = 'none';
-		input.setAttribute('aria-describedby', 'button-addon2');
+      let div = document.createElement("div");
+      div.className = "input-group";
 
-		let button = document.createElement('button');
-		button.type = 'button';
-		button.className = 'btn btn-outline-secondary';
-		button.id = 'button-addon2';
-		button.textContent = '전송';
-		button.disabled = true;
-		button.onclick = function() {
-			getAsk();
-		}
+      let menuBtn = document.createElement("button");
+      menuBtn.id = "menuBtn";
+      menuBtn.type = "button";
+      menuBtn.className = "btn btn-outline-secondary";
+      menuBtn.textContent = "∧";
+      menuBtn.onclick = function () {
+        showOrHiddenQuestion();
+      };
 
-		div.appendChild(menuBtn);
-		div.appendChild(input);
-		div.appendChild(button);
-		col.appendChild(div);
-		row.appendChild(col);
-		box.appendChild(row);
-	}
+      let input = document.createElement("input");
+      input.id = "chatInput";
+      input.type = "text";
+      input.className = "form-control";
+      input.placeholder = "메시지 전송";
+      // input.setAttribute('aria-label', "Recipient's username");
+      input.style.pointerEvents = "none";
+      input.setAttribute("aria-describedby", "button-addon2");
 
-	function showOrHiddenQuestion(){
-		let question = document.getElementById('question');
-		let menuBtn = document.getElementById('menuBtn');
-		console.log('숨김 여부: ', hideQuestion);
-		if (hideQuestion === true){
-			console.log('true 진입');
-			question.style.display = 'flex';
-			menuBtn.textContent = '∧';
-			hideQuestion = false;
-			console.log('true 진입 후: ', hideQuestion);
-			return;
-		}
-		if (hideQuestion === false){
-			console.log('false 진입');
-			question.style.display = 'none';
-			menuBtn.textContent = '≡';
-			hideQuestion = true;
-			console.log('false 진입 후: ', hideQuestion);
-			return;
-		}
-	}
+      let button = document.createElement("button");
+      button.type = "button";
+      button.className = "btn btn-outline-secondary";
+      button.id = "button-addon2";
+      button.textContent = "전송";
+      button.disabled = true;
+      button.onclick = function () {
+        getAsk();
+      };
 
-	// function typingText(box){
-	// 	let createDynamic = document.createElement('p');
-	// 	createDynamic.id='dynamic';
-	// 	createDynamic.className='dynamic-text';
-	// 	createDynamic.appendChild(document.createTextNode(createCSS()));
-	// 	box.appendChild(createDynamic);
+      div.appendChild(menuBtn);
+      div.appendChild(input);
+      div.appendChild(button);
+      col.appendChild(div);
+      row.appendChild(col);
+      box.appendChild(row);
+    }
 
-	// 	const dynamic = document.getElementById('dynamic');
+    function showOrHiddenQuestion() {
+      let question = document.getElementById("question");
+      let menuBtn = document.getElementById("menuBtn");
+      console.log("숨김 여부: ", hideQuestion);
+      if (hideQuestion === true) {
+        console.log("true 진입");
+        question.style.display = "flex";
+        menuBtn.textContent = "∧";
+        hideQuestion = false;
+        console.log("true 진입 후: ", hideQuestion);
+        return;
+      }
+      if (hideQuestion === false) {
+        console.log("false 진입");
+        question.style.display = "none";
+        menuBtn.textContent = "≡";
+        hideQuestion = true;
+        console.log("false 진입 후: ", hideQuestion);
+        return;
+      }
+    }
 
-	// 	function randomString() {
-	// 		let stringArr = ["Learn to HTML", "Learn to CSS", "Learn to JavaScript"];
-	// 		let selectString = stringArr[Math.floor(Math.random() * stringArr.length)];
-	// 		let selectStringArr = selectString.split("");
+    // function typingText(box){
+    // 	let createDynamic = document.createElement('p');
+    // 	createDynamic.id='dynamic';
+    // 	createDynamic.className='dynamic-text';
+    // 	createDynamic.appendChild(document.createTextNode(createCSS()));
+    // 	box.appendChild(createDynamic);
 
-	// 		// let str = "Learn to HTML";
-	// 		// let selectString = str.split("");
+    // 	const dynamic = document.getElementById('dynamic');
 
-	// 		return selectStringArr;
-	// 		// return selectString;
-	// 	}
+    // 	function randomString() {
+    // 		let stringArr = ["Learn to HTML", "Learn to CSS", "Learn to JavaScript"];
+    // 		let selectString = stringArr[Math.floor(Math.random() * stringArr.length)];
+    // 		let selectStringArr = selectString.split("");
 
-	// 	// 타이핑 리셋
-	// 	function resetTyping() {
-	// 		dynamic.textContent = "";
-	// 		dynamicShow(randomString());
-	// 	}
+    // 		// let str = "Learn to HTML";
+    // 		// let selectString = str.split("");
 
-	// 	// 한 글자씩 텍스트 출력 함수
-	// 	function dynamicShow(randomArr) {
-	// 		if (randomArr.length > 0) {
-	// 			dynamic.textContent += randomArr.shift();
-	// 			setTimeout(() => {
-	// 			dynamicShow(randomArr);
-	// 			}, 80);
-	// 		} else {
-	// 			setTimeout(resetTyping, 3000);
-	// 		}
-	// 	}
-	// 	dynamicShow(randomString());
+    // 		return selectStringArr;
+    // 		// return selectString;
+    // 	}
 
-	// 	function blink() {
-	// 		dynamic.classList.toggle("active");
-	// 	}
-	// 	setInterval(blink, 500);
-	// }
-</script>
+    // 	// 타이핑 리셋
+    // 	function resetTyping() {
+    // 		dynamic.textContent = "";
+    // 		dynamicShow(randomString());
+    // 	}
+
+    // 	// 한 글자씩 텍스트 출력 함수
+    // 	function dynamicShow(randomArr) {
+    // 		if (randomArr.length > 0) {
+    // 			dynamic.textContent += randomArr.shift();
+    // 			setTimeout(() => {
+    // 			dynamicShow(randomArr);
+    // 			}, 80);
+    // 		} else {
+    // 			setTimeout(resetTyping, 3000);
+    // 		}
+    // 	}
+    // 	dynamicShow(randomString());
+
+    // 	function blink() {
+    // 		dynamic.classList.toggle("active");
+    // 	}
+    // 	setInterval(blink, 500);
+    // }
+  </script>
 </html>
