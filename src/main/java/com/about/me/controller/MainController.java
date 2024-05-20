@@ -12,7 +12,7 @@ public class MainController {
 	
 	@GetMapping("/board")
 	public String board() {
-		return "board";
+		return "board_list";
 	}
 	
 //	@GetMapping("/nav")
