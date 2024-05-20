@@ -10,9 +10,14 @@ public class MainController {
 		return "index";
 	}
 	
+	@GetMapping("/board/list")
+	public String boardList() {
+		return "board_list";
+	}
+	
 	@GetMapping("/board")
 	public String board() {
-		return "board_list";
+		return "board";
 	}
 	
 //	@GetMapping("/nav")

@@ -2,6 +2,7 @@ package com.about.me.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,24 @@ public class BoardService {
 			result.add(dto);
 		}
 		return result;
+	}
+	
+	public BoardDto getBoard(long no) {
+		Optional<BoardEntity> result = boardRepository.findByNo(no);
+		BoardDto dto = new BoardDto();
+		if (result.isPresent()) {
+			BoardEntity entity = result.get();
+			dto.setNo(entity.getNo());
+			dto.setTitle(entity.getTitle());
+			dto.setContent(entity.getContent());
+			dto.setImage(entity.getImage());
+			dto.setId(entity.getId());
+			dto.setInsDate(entity.getInsDate());
+			dto.setUpdDate(entity.getUpdDate());
+		} else {
+			return null;
+		}
+		return dto;
 	}
 
 }
