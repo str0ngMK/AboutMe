@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-<meta charset="EUC-KR">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title></title>
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://getbootstrap.com/docs/5.3/assets/css/docs.css" rel="stylesheet" />
@@ -9,11 +10,143 @@
 </head>
 <body>
 	<nav th:replace="~{nav/nav :: nav}"></nav>
-	<div class="container">
-	
+	<div class="container" id="board">
+		<!-- <div class="row">
+			<div class="col">
+			</div>
+		</div> -->
 	</div>
 </body>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script type="text/javascript">
+	window.onload = function() {
+    	getBoard();
+    }
+
+	function getBoard() {
+		const urlParams = new URLSearchParams(window.location.search);
+        const no = urlParams.get('no');
+
+		fetch("/board/get?no=" + no)
+        .then((response) => {
+			if(response.ok){
+				return response.json();
+			}
+			window.location.href = "/error";
+        })
+        .then((data) => {
+			document.title = data.title;
+
+			const board = document.getElementById('board');
+
+			// let title = document.createElement('p');
+			// title.textContent = data.title;
+
+			createTitle(data.title, board);
+			createInsDate(data, board);
+
+			// let dateMenu = document.createElement('div');
+			// dateMenu.style.display = 'flex';
+			// dateMenu.style.flexDirection = 'column';
+			// dateMenu.style.textAlign = 'right';
+
+			// let insDate = document.createElement('p');
+			// insDate.textContent = '작성일: '+data.insDate;
+
+			// let updDate = document.createElement('p');
+			// updDate.textContent = '마지막 수정일: ' + data.updDate;
+
+			// dateMenu.appendChild(insDate);
+			// dateMenu.appendChild(updDate);
+			// board.appendChild(title);
+			// board.appendChild(dateMenu);
+		})
+		.catch((error) => {
+          	console.error("Error:", error);
+        });
+	}
+
+	function createTitle(dataTitle, board){
+		let row = document.createElement('div');
+		row.className = 'row';
+
+		let col = document.createElement('div');
+		col.className = 'col';
+
+		let title = document.createElement('p');
+		title.textContent = dataTitle;
+
+		col.appendChild(title);
+		row.appendChild(col);
+		board.appendChild(row);
+	}
+
+	function createInsDate(data, board){
+		const insDateTime = new Date(data.insDate);
+		const insYear = insDateTime.getFullYear();
+		let insMonth = dateFmtConverter(insDateTime.getMonth() + 1);
+		let insDay = dateFmtConverter(insDateTime.getDate());
+		let insHour = dateFmtConverter(insDateTime.getHours());
+		let insMinute = dateFmtConverter(insDateTime.getMinutes());
+		
+		const updDateTime = new Date(data.updDate);
+		const updYear = updDateTime.getFullYear();
+		let updMonth = dateFmtConverter(updDateTime.getMonth() + 1);
+		let updDay = dateFmtConverter(updDateTime.getDate());
+		let updHour = dateFmtConverter(updDateTime.getHours());
+		let updMinute = dateFmtConverter(updDateTime.getMinutes());
+
+		let row = document.createElement('div');
+		row.className = 'row';
+
+		let authorCol = document.createElement('div');
+		authorCol.className = 'col-md-9';
+
+		let dateGroupCol = document.createElement('div');
+		dateGroupCol.className = 'col'; 
+
+		let insDateRow = document.createElement('div');
+		insDateRow.className = 'row';
+
+		let insDateCol = document.createElement('div');
+		insDateCol.className = 'col';
+
+		let updDateRow = document.createElement('div');
+		updDateRow.className = 'row';
+
+		let updDateCol = document.createElement('div');
+		updDateCol.className = 'col';
+
+		let author = document.createElement('small');
+		author.textContent = data.id;
+
+		let insDate = document.createElement('small');
+		insDate.textContent = '작성일: ' + insYear + "." + insMonth + "." + insDay + " " + insHour + ":" + insMinute;
+
+		let updDate = document.createElement('small');
+		updDate.textContent = '마지막 수정일: ' + updYear + "." + updMonth + "." + updDay + " " + updHour + ":" + updMinute;
+
+		let hr = document.createElement('hr');
+
+		insDateCol.appendChild(insDate);
+		insDateRow.appendChild(insDateCol);
+		updDateCol.appendChild(updDate);
+		updDateRow.appendChild(updDateCol);
+		dateGroupCol.appendChild(insDateRow);
+		dateGroupCol.appendChild(updDateRow);
+		authorCol.appendChild(author);
+		row.appendChild(authorCol);
+		row.appendChild(dateGroupCol);
+		row.appendChild(hr);
+		board.appendChild(row);
+	}
+
+	function dateFmtConverter(element){
+		if (element < 10) {
+			element = '0' + element;
+		}
+		return element;
+	}
+
 </script>
 </html>
