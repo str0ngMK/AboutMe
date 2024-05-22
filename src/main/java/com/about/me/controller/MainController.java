@@ -21,6 +21,11 @@ public class MainController {
 		return "board";
 	}
 	
+	@GetMapping("/board/write")
+	public String boardWrite() {
+		return "board_write";
+	}
+	
 //	@GetMapping("/nav")
 //	public String nav() {
 //		return "nav/nav";

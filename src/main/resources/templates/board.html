@@ -8,6 +8,12 @@
     <link href="https://getbootstrap.com/docs/5.3/assets/css/docs.css" rel="stylesheet" />
     <link rel="stylesheet" type="text/css" href="/css/nav.css" />
 </head>
+<style>
+	.board_img{
+		max-width: 100%;
+		max-height: 100%;
+	}
+</style>
 <body>
 	<nav th:replace="~{nav/nav :: nav}"></nav>
 	<div class="container" id="board">
@@ -39,27 +45,9 @@
 
 			const board = document.getElementById('board');
 
-			// let title = document.createElement('p');
-			// title.textContent = data.title;
-
 			createTitle(data.title, board);
-			createInsDate(data, board);
-
-			// let dateMenu = document.createElement('div');
-			// dateMenu.style.display = 'flex';
-			// dateMenu.style.flexDirection = 'column';
-			// dateMenu.style.textAlign = 'right';
-
-			// let insDate = document.createElement('p');
-			// insDate.textContent = '작성일: '+data.insDate;
-
-			// let updDate = document.createElement('p');
-			// updDate.textContent = '마지막 수정일: ' + data.updDate;
-
-			// dateMenu.appendChild(insDate);
-			// dateMenu.appendChild(updDate);
-			// board.appendChild(title);
-			// board.appendChild(dateMenu);
+			createAuthorAndDate(data, board);
+			createContent(data.content, data.image, board);
 		})
 		.catch((error) => {
           	console.error("Error:", error);
@@ -81,7 +69,7 @@
 		board.appendChild(row);
 	}
 
-	function createInsDate(data, board){
+	function createAuthorAndDate(data, board){
 		const insDateTime = new Date(data.insDate);
 		const insYear = insDateTime.getFullYear();
 		let insMonth = dateFmtConverter(insDateTime.getMonth() + 1);
@@ -121,10 +109,10 @@
 		author.textContent = data.id;
 
 		let insDate = document.createElement('small');
-		insDate.textContent = '작성일: ' + insYear + "." + insMonth + "." + insDay + " " + insHour + ":" + insMinute;
+		insDate.textContent = '작성일 ' + insYear + "." + insMonth + "." + insDay + " " + insHour + ":" + insMinute;
 
 		let updDate = document.createElement('small');
-		updDate.textContent = '마지막 수정일: ' + updYear + "." + updMonth + "." + updDay + " " + updHour + ":" + updMinute;
+		updDate.textContent = '마지막 수정일 ' + updYear + "." + updMonth + "." + updDay + " " + updHour + ":" + updMinute;
 
 		let hr = document.createElement('hr');
 
@@ -139,6 +127,31 @@
 		row.appendChild(dateGroupCol);
 		row.appendChild(hr);
 		board.appendChild(row);
+	}
+
+	function createContent(dataContent, dataImage, board) {
+		if (dataImage.length > 0) {
+			let row = document.createElement('div');
+			row.className = 'row';
+			
+			let col = document.createElement('div');
+			col.className = 'col';
+			
+			let div = document.createElement('div');
+			div.className = 'content';
+
+			dataImage.forEach(img => {
+				let contentImg = '<' + img + '>';
+				let imgTag = '<img src="/file/' + img + '" class="board_img"/>';
+
+				dataContent = dataContent.replace(contentImg, imgTag);
+			})
+
+			div.innerHTML = dataContent;
+			col.appendChild(div);
+			row.appendChild(col);
+			board.appendChild(row);
+		}
 	}
 
 	function dateFmtConverter(element){

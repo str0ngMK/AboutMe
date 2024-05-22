@@ -25,7 +25,7 @@ public class BoardService {
 			dto.setNo(entity.getNo());
 			dto.setTitle(entity.getTitle());
 			dto.setContent(entity.getContent());
-			dto.setImage(entity.getImage());
+			dto.setImage(entity.getImage().split(","));
 			dto.setId(entity.getId());
 			dto.setInsDate(entity.getInsDate());
 			dto.setUpdDate(entity.getUpdDate());
@@ -42,7 +42,7 @@ public class BoardService {
 			dto.setNo(entity.getNo());
 			dto.setTitle(entity.getTitle());
 			dto.setContent(entity.getContent());
-			dto.setImage(entity.getImage());
+			dto.setImage(entity.getImage().split(","));
 			dto.setId(entity.getId());
 			dto.setInsDate(entity.getInsDate());
 			dto.setUpdDate(entity.getUpdDate());

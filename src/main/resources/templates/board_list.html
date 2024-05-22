@@ -60,7 +60,7 @@
             a.href = '/board?no=' + element.no;
 
             let img = document.createElement('img');
-            img.src = '/file/' + element.image;
+            img.src = '/file/' + element.image[0];
             img.className = 'card-img-top';
             img.alt = '...';
             img.style.height = '400px';
@@ -77,7 +77,7 @@
             
             let content = document.createElement('p');
             content.className = 'card-text';
-            content.textContent = element.content;
+            content.textContent = contentFmtConverter(element.content);
 
             let bottomMenu = document.createElement('p');
             bottomMenu.className = 'card-text';
@@ -108,6 +108,16 @@
         .catch((error) => {
           console.error("Error:", error);
         });
+    }
+
+    function contentFmtConverter(content){
+      let result = content.replace(/<[^>]*>/g, '');
+      console.log('result: ', result);
+      if (content.length > 30) {
+        return result.substring(0, 30) + "...";
+      } else {
+        return result;
+      }
     }
   </script>
 </html>

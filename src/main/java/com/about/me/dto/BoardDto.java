@@ -14,7 +14,7 @@ public class BoardDto {
 	private long no;
 	private String title;
 	private String content;
-	private String image;
+	private String[] image;
 	private String id;
 	private Date insDate;
 	private Date updDate;
