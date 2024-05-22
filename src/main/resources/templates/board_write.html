@@ -63,7 +63,7 @@
                         console.error("Error:", error);
                     });
 
-                    const imageUrl = `/board/image-print?filename=${filename}`;
+                    const imageUrl = '/board/image-print?filename=' + filename;
                     console.log('imageUrl: ', imageUrl);
                     callback(imageUrl, 'image alt attrivute');
 
