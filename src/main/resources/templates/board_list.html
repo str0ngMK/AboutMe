@@ -8,11 +8,29 @@
     <link href="https://getbootstrap.com/docs/5.3/assets/css/docs.css" rel="stylesheet" />
     <link rel="stylesheet" type="text/css" href="/css/nav.css" />
   </head>
+  <style>
+    #btn_col{
+      max-width: 768px;
+      display: flex;
+      justify-content: flex-end;
+      padding-bottom: 12px;
+    }
+  </style>
   <body>
     <nav th:replace="~{nav/nav :: nav}"></nav>
     <div class="container">
+      <div class="row d-flex justify-content-center">
+        <div class="col" id="btn_col">
+          <button type="button" class="btn btn-outline-primary" onclick="getBoardWrite()">글 작성</button>
+        </div>
+      </div>
       <div class="row">
         <div class="col d-flex justify-content-center">
+          <!-- <div class="row">
+            <div class="col">
+              <button type="button" class="btn btn-outline-primary">글 작성</button>
+            </div>
+          </div> -->
           <div id="board">
             <!-- <img src="/file/java.png" /> -->
           </div>
@@ -59,13 +77,6 @@
             let a = document.createElement('a');
             a.href = '/board?no=' + element.no;
 
-            let img = document.createElement('img');
-            img.src = '/file/' + element.image[0];
-            img.className = 'card-img-top';
-            img.alt = '...';
-            img.style.height = '400px';
-            img.style.objectFit = 'cover';
-
             let cardBody = document.createElement('div');
             cardBody.className = 'card-body';
 
@@ -97,8 +108,10 @@
             cardBody.appendChild(title);
             cardBody.appendChild(content);
             cardBody.appendChild(bottomMenu);
-            a.appendChild(img)
-            card.appendChild(a);
+            if (element.image[0] !== "" && element.image[0] !== null){
+              a.appendChild(isImg(element.image[0]));
+              card.appendChild(a);
+            }
             card.appendChild(cardBody);
             col.appendChild(card);
             row.appendChild(col);
@@ -110,9 +123,23 @@
         });
     }
 
+    function isImg(image){
+      let img = document.createElement('img');
+      img.src = '/file/' + image
+      img.className = 'card-img-top';
+      img.alt = '...';
+      img.style.height = '400px';
+      img.style.objectFit = 'cover';
+
+      return img;
+    }
+
+    function getBoardWrite(){
+      window.location.href='/board/write';
+    }
+
     function contentFmtConverter(content){
       let result = content.replace(/<[^>]*>/g, '');
-      console.log('result: ', result);
       if (content.length > 30) {
         return result.substring(0, 30) + "...";
       } else {
