@@ -5,10 +5,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.about.me.config.ApplicationConfig;
 import com.about.me.dto.BoardDto;
+import com.about.me.dto.req.ReqBoardDto;
 import com.about.me.entity.BoardEntity;
 import com.about.me.repository.BoardRepository;
 
@@ -28,16 +32,16 @@ public class BoardService {
 	@Autowired
 	private ApplicationConfig applicationConfig;
 	
-	public List<BoardDto> getBoardList() {
+	public List<ReqBoardDto> getBoardList() {
 		List<BoardEntity> list = boardRepository.findByDelYn(false);
-		List<BoardDto> result = new ArrayList<>();
+		List<ReqBoardDto> result = new ArrayList<>();
 		for (BoardEntity entity : list) {
-			BoardDto dto = new BoardDto();
-			dto.setNo(entity.getNo());
-			dto.setTitle(entity.getTitle());
-			dto.setContent(entity.getContent());
-			dto.setImage(entity.getImage().split(","));
-			dto.setId(entity.getId());
+			ReqBoardDto dto = new ReqBoardDto();
+			dto.setNo(entity.toDto().getNo());
+			dto.setTitle(entity.toDto().getTitle());
+			dto.setPreview(entity.toDto().getPreview());
+			dto.setImage(entity.toDto().getImage());
+			dto.setAuthor(entity.toDto().getAuthor());
 			dto.setInsDate(entity.getInsDate());
 			dto.setUpdDate(entity.getUpdDate());
 			result.add(dto);
@@ -46,16 +50,16 @@ public class BoardService {
 	}
 	
 	
-	public BoardDto getBoard(long no) {
+	public ReqBoardDto getBoard(long no) {
 		Optional<BoardEntity> result = boardRepository.findByNo(no);
-		BoardDto dto = new BoardDto();
+		ReqBoardDto dto = new ReqBoardDto();
 		if (result.isPresent()) {
 			BoardEntity entity = result.get();
-			dto.setNo(entity.getNo());
-			dto.setTitle(entity.getTitle());
-			dto.setContent(entity.getContent());
-			dto.setImage(entity.getImage().split(","));
-			dto.setId(entity.getId());
+			dto.setNo(entity.toDto().getNo());
+			dto.setTitle(entity.toDto().getTitle());
+			dto.setContent(entity.toDto().getContent());
+			dto.setImage(entity.toDto().getImage());
+			dto.setAuthor(entity.toDto().getAuthor());
 			dto.setInsDate(entity.getInsDate());
 			dto.setUpdDate(entity.getUpdDate());
 		} else {
@@ -113,13 +117,59 @@ public class BoardService {
         }
 	}
 	
-	public void saveBoard(Map<String, Object> body) {
-		String title = String.valueOf(body.get("title"));
-		String content = String.valueOf(body.get("content"));
+	public Map<String, Object> saveBoard(ReqBoardDto body) {
+		Map<String, Object> result = new HashMap<>();
+		BoardDto dto = new BoardDto();
+		try {
+			String title = body.getTitle();
+			String content = body.getContent();
+			String preview = body.getPreview();
+			String image = imgTest(content);
+			String author = body.getAuthor();
+			String boardPwd = body.getBoardPwd();
+			
+			dto.setTitle(title);
+			dto.setContent(content);
+			dto.setPreview(preview);
+			dto.setImage(image);
+			dto.setAuthor(author);
+			dto.setBoardPwd(boardPwd);
+			
+			imgTest(content);
+			
+			boardRepository.saveAndFlush(dto.toEntity());
+		} catch (Exception e) {
+			e.printStackTrace();
+			result.put("result", false);
+			result.put("message", "저장을 실패하였습니다. 잠시 후 다시 시도 해 주세요.");
+			return result;
+		}
+		result.put("result", true);
+		result.put("message", "저장 완료");
 		
-		
-		
-		
+		return result;
 	}
-
+	
+	private String imgTest(String content) {
+		String uploadDir = applicationConfig.getImgRepoPath();
+		
+		Pattern pattern = Pattern.compile("/board/image-print\\?filename=([^&)]+)");
+		Matcher matcher = pattern.matcher(content);
+		String image = null;
+		
+		if (matcher.find()) {
+			image = matcher.group(1);
+		}
+		
+		return image;
+				
+//		while(matcher.find()) {
+//			System.out.println("찾은 패턴: " + matcher.group());
+//		}
+		
+//        String fileFullPath = Paths.get(uploadDir, filename).toString();
+//
+//        // 파일이 없는 경우 예외 throw
+//        File uploadedFile = new File(fileFullPath);
+	}
 }

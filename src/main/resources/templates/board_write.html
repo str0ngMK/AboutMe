@@ -33,25 +33,27 @@
             </div>
             <div class="modal-body">
                 <form>
-                    <div class="mb-3">
-                        <label for="recipient-name" class="col-form-label">작성자:</label>
-                        <input type="text" class="form-control" id="recipient-name" aria-label="1">
-                        <span id="1" class="form-text">
+                    <div class="mb-3" id="author-box">
+                        <label for="author-value" class="col-form-label">작성자:</label>
+                        <input type="text" class="form-control" id="author-value" aria-label="1" ria-describedby="test01">
+		                <!-- <div id="test01" class="invalid-feedback">Please fill out this field.</div> -->
+                        <!-- <span id="1" class="form-text">
                             1 ~ 20글자만 가능합니다.
-                        </span>
+                        </span> -->
                     </div>
-                    <div class="mb-3">
-                        <label for="message-text" class="col-form-label">비밀번호:</label>
-                        <input type="password" class="form-control" id="message-text" aria-label="2">
-                        <span id="2" class="form-text">
+                    <div class="mb-3" id="pwd-box">
+                        <label for="pwd-value" class="col-form-label">비밀번호:</label>
+                        <input type="password" class="form-control" id="pwd-value" aria-label="2" ria-describedby="test02">
+                        <!-- <div id="test02" class="invalid-feedback">Please fill out this field.</div> -->
+                        <!-- <span id="2" class="form-text">
                             1 ~ 16글자만 가능합니다.
-                        </span>
+                        </span> -->
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
-              <button type="button" class="btn btn-primary">저장</button>
+              <button type="button" class="btn btn-primary" onclick="authorPwdValidity()">저장</button>
             </div>
           </div>
         </div>
@@ -85,7 +87,7 @@
         <div class="row">
             <div class="col d-flex justify-content-end">
                 <button type="button" class="btn btn-outline-danger m-2" onclick="back()">취소</button>
-                <!-- <button type="button" class="btn btn-primary m-2" onclick="titleContentValidity()" data-bs-toggle="modal" data-bs-target="#exampleModal">완료</button> -->
+                <!-- <button type="button" class="btn btn-primary m-2" data-bs-toggle="modal" data-bs-target="#exampleModal">완료</button> -->
                 <button type="button" class="btn btn-primary m-2" onclick="titleContentValidity()">완료</button>
             </div>
         </div>
@@ -153,16 +155,112 @@
         }
     });
 
-    function titleContentValidity(){
+    function titleContentValidity() {
+        let isSuccess = true;
         let title = document.getElementById('title').value;
         let content = editor.getMarkdown();
 
-        if (title.length < 1 || title === "" || title === " "){
+        if (title.length < 1 || /^\s*$/.test(title)) {
+            isSuccess = false;
             appendAlert("no title", "success");
-        }
-        if (content.length < 1 || content === "" || content === " "){
+        } 
+        if (content.length < 1 || /^\s*$/.test(content)) {
+            isSuccess = false;
             appendAlert("no content", "success");
         }
+        if (isSuccess) {
+            const modal = new bootstrap.Modal(document.getElementById('exampleModal'));
+            modal.show();
+
+            const author = document.getElementById('author-value');
+            author.addEventListener('input', () => {
+                const maxLength = 20;
+                const currentLength = author.value.length;
+                if (currentLength > maxLength){
+                    author.value = author.value.slice(0, maxLength);
+                }
+            });
+
+            const pwd = document.getElementById('pwd-value');
+            pwd.addEventListener('input', () => {
+                const maxLength = 16;
+                const currentLength = pwd.value.length;
+                if (currentLength > maxLength) {
+                    pwd.value = pwd.value.slice(0, maxLength);
+                }
+            })
+        }
+    }
+
+    function authorPwdValidity(){
+        let isSuccess = true;
+        const author = document.getElementById('author-value').value;
+        const pwd = document.getElementById('pwd-value').value;
+
+        if (author.length < 1 || /^\s*$/.test(author)) {
+            isSuccess=false;
+            const authorBox = document.getElementById('author-box');
+            
+            const feedback = document.createElement('div');
+            feedback.id = 'test01';
+            feedback.className = 'invalid-feedback';
+            feedback.textContent = '1~20자 입력';
+
+            const authorValue = document.getElementById('author-value');
+            authorValue.className = 'form-control is-invalid';
+            
+            authorBox.appendChild(feedback);
+        }
+        if (pwd.length < 1 || /^\s*$/.test(pwd)) {
+            isSuccess=false;
+            const pwdBox = document.getElementById('pwd-box');
+            
+            const feedback = document.createElement('div');
+            feedback.id = 'test02';
+            feedback.className = 'invalid-feedback';
+            feedback.textContent = '1~16자 입력';
+            
+            const pwdValue = document.getElementById('pwd-value');
+            pwdValue.className = 'form-control is-invalid';
+
+            pwdBox.appendChild(feedback);
+        }
+
+        if (isSuccess){
+            save(author, pwd);
+        }
+    }
+
+    function save(author, pwd) {
+        const title = document.getElementById('title').value;
+        const content = editor.getMarkdown();
+        const preview = editor.getHTML().replace(/<[^>]*>/g, "").substring(0, 20);
+
+        const formData = { title : title, content : content, preview : preview, author : author, boardPwd : pwd };
+
+        fetch("/board/save", {
+            method : 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body : JSON.stringify(formData),
+        })
+        .then((response) => {
+            if(response.ok){
+                return response.json();
+            }
+            window.location.href = "/error";
+        })
+        .then((data) => {
+            if(data.result){
+                window.location.href='/board/list';
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch((error) => {
+            console.error("Error:", error);
+        });
     }
 
     function appendAlert(message, type) {

@@ -44,7 +44,6 @@
 	}
 
 	blockquote::before {
-		
 		/*Font*/
 		font-family: Georgia, serif;
 		font-size: 60px;
@@ -176,7 +175,7 @@
 		updDateCol.className = 'col';
 
 		let author = document.createElement('small');
-		author.textContent = data.id;
+		author.textContent = data.author;
 
 		let insDate = document.createElement('small');
 		insDate.textContent = '작성일 ' + insYear + "." + insMonth + "." + insDay + " " + insHour + ":" + insMinute;
@@ -209,14 +208,14 @@
 		let div = document.createElement('div');
 		div.className = 'content';
 
-		if (dataImage.length > 0) {
-			dataImage.forEach(img => {
-				let contentImg = '<' + img + '>';
-				let imgTag = '<img src="/file/' + img + '" class="board_img"/>';
+		// if (dataImage.length > 0) {
+		// 	dataImage.forEach(img => {
+		// 		let contentImg = '<' + img + '>';
+		// 		let imgTag = '<img src="/file/' + img + '" class="board_img"/>';
 
-				dataContent = dataContent.replace(contentImg, imgTag);
-			})
-		}
+		// 		dataContent = dataContent.replace(contentImg, imgTag);
+		// 	})
+		// }
 
 		const htmlContent = marked(dataContent);
 		div.innerHTML = htmlContent;

@@ -88,7 +88,7 @@
             
             let content = document.createElement('p');
             content.className = 'card-text';
-            content.textContent = contentFmtConverter(element.content);
+            content.textContent = element.preview;
 
             let bottomMenu = document.createElement('p');
             bottomMenu.className = 'card-text';
@@ -97,7 +97,7 @@
 
             let author = document.createElement('small');
             author.className = 'text-body-secondary';
-            author.textContent = element.id;
+            author.textContent = element.author;
 
             let time = document.createElement('small');
             time.className = 'text-body-secondary';
@@ -108,8 +108,8 @@
             cardBody.appendChild(title);
             cardBody.appendChild(content);
             cardBody.appendChild(bottomMenu);
-            if (element.image[0] !== "" && element.image[0] !== null){
-              a.appendChild(isImg(element.image[0]));
+            if (element.image !== "" && element.image !== null){
+              a.appendChild(isImg(element.image));
               card.appendChild(a);
             }
             card.appendChild(cardBody);
@@ -138,13 +138,13 @@
       window.location.href='/board/write';
     }
 
-    function contentFmtConverter(content){
-      let result = content.replace(/<[^>]*>/g, '');
-      if (content.length > 30) {
-        return result.substring(0, 30) + "...";
-      } else {
-        return result;
-      }
-    }
+    // function contentFmtConverter(content){
+    //   let result = content.replace(/<[^>]*>/g, '');
+    //   if (content.length > 30) {
+    //     return result.substring(0, 30) + "...";
+    //   } else {
+    //     return result;
+    //   }
+    // }
   </script>
 </html>
