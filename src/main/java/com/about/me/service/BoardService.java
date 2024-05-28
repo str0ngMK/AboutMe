@@ -3,6 +3,7 @@ package com.about.me.service;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,6 +23,10 @@ import com.about.me.dto.BoardDto;
 import com.about.me.dto.req.ReqBoardDto;
 import com.about.me.entity.BoardEntity;
 import com.about.me.repository.BoardRepository;
+
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Service
 public class BoardService {
@@ -68,7 +73,7 @@ public class BoardService {
 		return dto;
 	}
 	
-	public String uploadImage(MultipartFile image){
+	public String uploadImage(MultipartFile image, HttpServletResponse response){
 		String uploadDir = applicationConfig.getImgRepoPath();
 		
 		if (image.isEmpty()) {
@@ -89,6 +94,14 @@ public class BoardService {
 		try {
 			File uploadFile = new File(fileFullPath);
 			image.transferTo(uploadFile);
+			
+			Cookie cookie = new Cookie(saveFilename, "filename");
+			cookie.setHttpOnly(true);
+			cookie.setSecure(true);
+			cookie.setPath("/");
+			cookie.setMaxAge(7 * 24 * 60 * 60);
+			response.addCookie(cookie);
+			
 			return saveFilename;
 		} catch(IOException e) {
 			throw new RuntimeException(e);
@@ -117,14 +130,17 @@ public class BoardService {
         }
 	}
 	
-	public Map<String, Object> saveBoard(ReqBoardDto body) {
+	public Map<String, Object> saveBoard(ReqBoardDto body, HttpServletRequest request, HttpServletResponse response) {
 		Map<String, Object> result = new HashMap<>();
 		BoardDto dto = new BoardDto();
+		String content = null;
+		List<String> realImage = null;
 		try {
 			String title = body.getTitle();
-			String content = body.getContent();
+			content = body.getContent();
+			realImage = getRealImg(content);
 			String preview = body.getPreview();
-			String image = imgTest(content);
+			String image = realImage.size() == 0 ? null : realImage.get(0);
 			String author = body.getAuthor();
 			String boardPwd = body.getBoardPwd();
 			
@@ -135,7 +151,7 @@ public class BoardService {
 			dto.setAuthor(author);
 			dto.setBoardPwd(boardPwd);
 			
-			imgTest(content);
+//			getRealImg(content);
 			
 			boardRepository.saveAndFlush(dto.toEntity());
 		} catch (Exception e) {
@@ -143,23 +159,57 @@ public class BoardService {
 			result.put("result", false);
 			result.put("message", "저장을 실패하였습니다. 잠시 후 다시 시도 해 주세요.");
 			return result;
-		}
+		} finally {
+			Cookie[] cookies = request.getCookies();
+			
+			if(cookies != null) {
+				for (Cookie cookie: cookies) {
+					if (cookie.getValue().equals("filename")) {
+						if (realImage.size() != 0) {
+							for (String filename : getRealImg(content)) {
+								if (!cookie.getName().equals(filename) ) {
+									deleteImage(cookie.getName());
+								}
+							}
+						} else {
+							deleteImage(cookie.getName());
+						}
+						cookie.setPath("/");
+						cookie.setMaxAge(0);
+						response.addCookie(cookie);
+					}
+				}
+			}
+		} 
 		result.put("result", true);
 		result.put("message", "저장 완료");
 		
 		return result;
 	}
 	
-	private String imgTest(String content) {
+	private void deleteImage(String filename) {
 		String uploadDir = applicationConfig.getImgRepoPath();
+		Path path = Paths.get(uploadDir + filename);
+		try {
+			Files.delete(path);
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private List<String> getRealImg(String content) {
+		List<String> image = new ArrayList<>();
 		
 		Pattern pattern = Pattern.compile("/board/image-print\\?filename=([^&)]+)");
 		Matcher matcher = pattern.matcher(content);
-		String image = null;
 		
-		if (matcher.find()) {
-			image = matcher.group(1);
+		
+		while(matcher.find()) {
+			image.add(matcher.group(1));
 		}
+//		if (matcher.find()) {
+//			image = matcher.group(1);
+//		}
 		
 		return image;
 				
@@ -171,5 +221,19 @@ public class BoardService {
 //
 //        // 파일이 없는 경우 예외 throw
 //        File uploadedFile = new File(fileFullPath);
+	}
+	
+	public void deleteCookie(HttpServletRequest request, HttpServletResponse response) {
+		Cookie[] cookies = request.getCookies();
+		
+		if(cookies != null) {
+			for (Cookie cookie: cookies) {
+				if (cookie.getValue().equals("filename")) {
+					cookie.setPath("/");
+					cookie.setMaxAge(0);
+					response.addCookie(cookie);
+				}
+			}
+		}
 	}
 }

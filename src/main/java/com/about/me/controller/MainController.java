@@ -1,11 +1,22 @@
 package com.about.me.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.about.me.service.BoardService;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
 @Controller
 public class MainController {
+	
+	@Autowired
+	private BoardService boardService;
+	
+	
 	@GetMapping("/")
 	public String index() {
 		return "index";
@@ -22,7 +33,8 @@ public class MainController {
 	}
 	
 	@GetMapping("/board/write")
-	public String boardWrite() {
+	public String boardWrite(HttpServletRequest request, HttpServletResponse response) {
+		boardService.deleteCookie(request, response);
 		return "board_write";
 	}
 	

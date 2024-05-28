@@ -10,6 +10,13 @@
     <link rel="stylesheet" type="text/css" href="/css/nav.css" />
 </head>
 <style>
+	.content p{
+		word-wrap: break-word;
+	}
+	.content p img {
+		width: 100%;
+	}
+
 	.board_img{
 		max-width: 100%;
 		max-height: 100%;
@@ -55,10 +62,6 @@
 		left: 10px;
 		top:5px;
 	}
- 
-	blockquote::after{
-		/*Reset to make sure*/
-	}
 
 	blockquote p {
 		margin: auto;
@@ -67,6 +70,40 @@
 </style>
 <body>
 	<nav th:replace="~{nav/nav :: nav}"></nav>
+	<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="exampleModalLabel">저장 하기</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3" id="author-box">
+                        <label for="author-value" class="col-form-label">작성자:</label>
+                        <input type="text" class="form-control" id="author-value" aria-label="1" ria-describedby="test01">
+		                <!-- <div id="test01" class="invalid-feedback">Please fill out this field.</div> -->
+                        <!-- <span id="1" class="form-text">
+                            1 ~ 20글자만 가능합니다.
+                        </span> -->
+                    </div>
+                    <div class="mb-3" id="pwd-box">
+                        <label for="pwd-value" class="col-form-label">비밀번호:</label>
+                        <input type="password" class="form-control" id="pwd-value" aria-label="2" ria-describedby="test02">
+                        <!-- <div id="test02" class="invalid-feedback">Please fill out this field.</div> -->
+                        <!-- <span id="2" class="form-text">
+                            1 ~ 16글자만 가능합니다.
+                        </span> -->
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+              <button type="button" class="btn btn-primary" onclick="authorPwdValidity()">저장</button>
+            </div>
+          </div>
+        </div>
+    </div>
 	<div class="container" id="board">
 		<!-- <div class="row">
 			<div class="col">
@@ -112,7 +149,6 @@
 			createAuthorAndDate(data, board);
 			createContent(data.content, data.image, board);
 
-			// console.log('요소: ', document.querySelectorAll('.content'));
 			document.querySelectorAll('.content pre').forEach((block) => {
 				console.log('block: ', block);
 			hljs.highlightBlock(block);
@@ -159,8 +195,8 @@
 		let authorCol = document.createElement('div');
 		authorCol.className = 'col-md-9';
 
-		let dateGroupCol = document.createElement('div');
-		dateGroupCol.className = 'col'; 
+		let groupCol = document.createElement('div');
+		groupCol.className = 'col';
 
 		let insDateRow = document.createElement('div');
 		insDateRow.className = 'row';
@@ -174,28 +210,70 @@
 		let updDateCol = document.createElement('div');
 		updDateCol.className = 'col';
 
+		let btnRow = document.createElement('div');
+		btnRow.className = 'row';
+
+		let btnCol = document.createElement('div');
+		btnCol.className = 'col justify-content-end';
+		btnCol.style.display = 'flex';
+
 		let author = document.createElement('small');
 		author.textContent = data.author;
 
 		let insDate = document.createElement('small');
 		insDate.textContent = '작성일 ' + insYear + "." + insMonth + "." + insDay + " " + insHour + ":" + insMinute;
+		insDate.style.whiteSpace = 'nowrap';
 
 		let updDate = document.createElement('small');
 		updDate.textContent = '마지막 수정일 ' + updYear + "." + updMonth + "." + updDay + " " + updHour + ":" + updMinute;
+		updDate.style.whiteSpace = 'nowrap';
+
+		let modifyBtn = document.createElement('button');
+		modifyBtn.className = 'btn btn-outline-secondary h-75';
+		modifyBtn.textContent = '수정';
+		modifyBtn.style.display = 'flex';
+		modifyBtn.style.alignItems = 'center';
+		modifyBtn.onclick = function() {
+			const modal = new bootstrap.Modal(document.getElementById('exampleModal'));
+            modal.show();
+		}
+
+		let deleteBtn = document.createElement('button');
+		deleteBtn.className = 'btn btn-outline-secondary h-75';
+		deleteBtn.textContent = '삭제';
+		deleteBtn.style.display = 'flex';
+		deleteBtn.style.alignItems = 'center';
+		deleteBtn.onclick = function(){
+			const modal = new bootstrap.Modal(document.getElementById('exampleModal'));
+            modal.show();
+		}
 
 		let hr = document.createElement('hr');
 
 		insDateCol.appendChild(insDate);
 		insDateRow.appendChild(insDateCol);
+
 		updDateCol.appendChild(updDate);
 		updDateRow.appendChild(updDateCol);
-		dateGroupCol.appendChild(insDateRow);
-		dateGroupCol.appendChild(updDateRow);
+
+		btnCol.appendChild(modifyBtn);
+		btnCol.appendChild(deleteBtn);
+		btnRow.appendChild(btnCol);
+
+		groupCol.appendChild(insDateRow);
+		groupCol.appendChild(updDateRow);
+		groupCol.appendChild(btnRow);
 		authorCol.appendChild(author);
+		
 		row.appendChild(authorCol);
-		row.appendChild(dateGroupCol);
+		row.appendChild(groupCol);
 		row.appendChild(hr);
+
 		board.appendChild(row);
+	}
+
+	function pwdValidity(){
+		console.log('success');
 	}
 
 	function createContent(dataContent, dataImage, board) {

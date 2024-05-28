@@ -1,8 +1,6 @@
 package com.about.me.controller;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,6 +15,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.about.me.dto.req.ReqBoardDto;
 import com.about.me.service.BoardService;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
 @RequestMapping("/board")
@@ -41,8 +42,8 @@ public class BoardController {
 	}
 	
 	@PostMapping("/image-upload")
-	public ResponseEntity<String> uploadEditorImage(@RequestParam(name = "image") MultipartFile image) {
-		return ResponseEntity.ok().body(boardService.uploadImage(image));
+	public ResponseEntity<String> uploadEditorImage(@RequestParam(name = "image") MultipartFile image, HttpServletResponse response) {
+		return ResponseEntity.ok().body(boardService.uploadImage(image, response));
 	}
 	
 	@GetMapping("/image-print")
@@ -51,7 +52,7 @@ public class BoardController {
     }
     
     @PostMapping("/save")
-    public ResponseEntity<?> saveBoard(@RequestBody ReqBoardDto body){
-    	return ResponseEntity.ok().body(boardService.saveBoard(body));
+    public ResponseEntity<?> saveBoard(@RequestBody ReqBoardDto body, HttpServletRequest request, HttpServletResponse response){
+    	return ResponseEntity.ok().body(boardService.saveBoard(body, request, response));
     }
 }
