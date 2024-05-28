@@ -27,6 +27,7 @@ import com.about.me.repository.BoardRepository;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 @Service
 public class BoardService {
@@ -71,6 +72,18 @@ public class BoardService {
 			return null;
 		}
 		return dto;
+	}
+	
+	public boolean isBoard(long no) {
+		boolean result = false;
+		Optional<BoardEntity> board = boardRepository.findByNo(no);
+		if (board.isPresent()) {
+			BoardDto dto = board.get().toDto();
+			if(!dto.isDelYn()) {
+				result = true;
+			}
+		}
+		return result;
 	}
 	
 	public String uploadImage(MultipartFile image, HttpServletResponse response){
@@ -236,4 +249,41 @@ public class BoardService {
 			}
 		}
 	}
+	
+	public boolean checkBoardPwd(HttpSession session, long no, String pwd) {
+		boolean result = boardRepository.existsByNoAndBoardPwd(no, pwd);
+		if (result) {
+			session.setAttribute("board", no);
+			session.setAttribute("result", true);
+		}
+		return result;
+	}
+	
+	public boolean deleteBoard(long no) {
+		Optional<BoardEntity> result = boardRepository.findByNo(no);
+		if (result.isPresent()) {
+			try {
+				BoardDto dto = result.get().toDto();
+				dto.setDelYn(true);
+				boardRepository.save(dto.toEntity());
+			} catch (Exception e) {
+				return false;
+			}
+		} else {
+			return false;
+		}
+		return true;
+	}
+	
+	public ReqBoardDto modifyBoard(HttpSession session) {
+		Optional<BoardEntity> result = boardRepository.findByNo((long)session.getAttribute("board"));
+		ReqBoardDto dto = new ReqBoardDto();
+		if(result.isPresent()) {
+			BoardEntity entity = result.get();
+			dto.setTitle(entity.toDto().getTitle());
+			dto.setContent(entity.toDto().getContent());
+		}
+		return dto;
+	}
+
 }

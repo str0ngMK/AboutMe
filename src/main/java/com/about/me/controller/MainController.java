@@ -9,6 +9,7 @@ import com.about.me.service.BoardService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 public class MainController {
@@ -29,13 +30,24 @@ public class MainController {
 	
 	@GetMapping("/board")
 	public String board(@RequestParam (name="no") long no) {
-		return "board";
+		if (boardService.isBoard(no)) {
+			return "board";
+		}
+		return "/error";
 	}
 	
 	@GetMapping("/board/write")
 	public String boardWrite(HttpServletRequest request, HttpServletResponse response) {
 		boardService.deleteCookie(request, response);
 		return "board_write";
+	}
+	
+	@GetMapping("/board/modify")
+	public String boardModify(HttpSession session, @RequestParam(name = "no") long no) {
+		if(session.getAttribute("result") != null && (boolean)session.getAttribute("result") && ((long)session.getAttribute("board") == no)) {
+			return "board_modify";
+		}
+		return "/error";
 	}
 	
 //	@GetMapping("/nav")

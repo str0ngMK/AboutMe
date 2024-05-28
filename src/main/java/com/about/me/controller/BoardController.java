@@ -1,6 +1,8 @@
 package com.about.me.controller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -8,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -18,6 +21,7 @@ import com.about.me.service.BoardService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 @RequestMapping("/board")
@@ -55,4 +59,57 @@ public class BoardController {
     public ResponseEntity<?> saveBoard(@RequestBody ReqBoardDto body, HttpServletRequest request, HttpServletResponse response){
     	return ResponseEntity.ok().body(boardService.saveBoard(body, request, response));
     }
+    
+    @PostMapping("/pwdCheck")
+    public ResponseEntity<?> checkBoardPwd(HttpSession session, @RequestBody ReqBoardDto body){
+    	return ResponseEntity.ok().body(boardService.checkBoardPwd(session, body.getNo(), body.getBoardPwd()));
+    }
+    
+    @PutMapping("/delete")
+    public ResponseEntity<Map<String, Object>> deleteBoard(HttpSession session){
+    	Map<String, Object> result = new HashMap<>();
+//    	boolean isPwdCheck = boardService.checkBoardPwd(body.getNo(), body.getBoardPwd());
+//    	if (!isPwdCheck) {
+//    		result.put("result", false);
+//    		result.put("message", "비밀번호를 확인 해 주세요.");
+//    		return ResponseEntity.ok().body(result);
+//    	}
+    	if (session.getAttribute("result") == null || !(boolean) session.getAttribute("result")) {
+    		result.put("result", false);
+    		result.put("message", "잘못 된 요청 입니다.");
+    		return ResponseEntity.ok().body(result);
+    	}
+    	boolean isDeleteResult =  boardService.deleteBoard((long)session.getAttribute("board"));
+    	if (!isDeleteResult) {
+    		result.put("result", false);
+    		result.put("message", "문제가 발생 하였습니다. 잠시 후 다시 시도 해 주세요.");
+    		return ResponseEntity.ok().body(result);
+    	}
+    	// 세션 삭제
+    	session.invalidate();
+    	
+    	result.put("result", true);
+    	result.put("message", "");
+    	return ResponseEntity.ok().body(result);
+    }
+    
+    @GetMapping("/test")
+    public ResponseEntity<ReqBoardDto> modifyBoard(HttpSession session){
+//    	Map<String, Object> result = new HashMap<>();
+//    	boolean isPwdCheck = boardService.checkBoardPwd(body.getNo(), body.getBoardPwd());
+//    	if (!isPwdCheck) {
+//    		result.put("result", false);
+//    		result.put("message", "비밀번호를 확인 해 주세요.");
+//    		return ResponseEntity.ok().body(result);
+//    	}
+    	
+    	return null;
+//    	String pwd = String.valueOf(body.get("pwd"));
+//    	if (!pwd.equals("123")) {
+//    		return "/error";
+//    	}
+//    	return "board_write";
+//    	return ResponseEntity.ok().body(boardService.modifyBoard(no));
+    }
+    
 }

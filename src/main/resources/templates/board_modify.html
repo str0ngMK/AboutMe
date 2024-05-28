@@ -24,40 +24,6 @@
     }
 </style>
 <body>
-    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h1 class="modal-title fs-5" id="exampleModalLabel">저장 하기</h1>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form>
-                    <div class="mb-3" id="author-box">
-                        <label for="author-value" class="col-form-label">작성자:</label>
-                        <input type="text" class="form-control" id="author-value" aria-label="1" ria-describedby="test01">
-		                <!-- <div id="test01" class="invalid-feedback">Please fill out this field.</div> -->
-                        <!-- <span id="1" class="form-text">
-                            1 ~ 20글자만 가능합니다.
-                        </span> -->
-                    </div>
-                    <div class="mb-3" id="pwd-box">
-                        <label for="pwd-value" class="col-form-label">비밀번호:</label>
-                        <input type="password" class="form-control" id="pwd-value" aria-label="2" ria-describedby="test02">
-                        <!-- <div id="test02" class="invalid-feedback">Please fill out this field.</div> -->
-                        <!-- <span id="2" class="form-text">
-                            1 ~ 16글자만 가능합니다.
-                        </span> -->
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
-              <button type="button" class="btn btn-primary" onclick="authorPwdValidity()">저장</button>
-            </div>
-          </div>
-        </div>
-    </div>
     <nav th:replace="~{nav/nav :: nav}"></nav>
     <div class="container">
         <div class="row" id="alertRow">
@@ -96,13 +62,11 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
 <script type="text/javascript">
-    window.onload = function() {
-        const tabItem = document.querySelectorAll('tab-item');
-        console.log('아이템: ', tabItem);
-        tabItem.forEach(element => {
-            console.log('요소: ', element);
-        });
+    const urlParams = new URLSearchParams(window.location.search);
+    const no = urlParams.get('no');
 
+    window.onload = function() {
+        getBoard();
         titleReSize();
         titleLimitLength();
         contentLimitLength();
@@ -155,6 +119,30 @@
         }
     });
 
+    function getBoard(){
+        fetch("/board/get?no=" + no, {
+            method : 'GET',
+            // headers: {
+            //     'Content-Type': 'application/json'
+            // },
+            // body : JSON.stringify(formData),
+        })
+        .then((response) => {
+            if(response.ok){
+                return response.json();
+            }
+            window.location.href = "/error";
+        })
+        .then((data) => {
+            const title = document.getElementById('title');
+            title.value = data.title;
+            editor.setMarkdown(data.content);
+        })
+        .catch((error) => {
+            console.log('Error: ', error);
+        });
+    }
+
     function titleContentValidity() {
         let isSuccess = true;
         let title = document.getElementById('title').value;
@@ -193,48 +181,48 @@
         }
     }
 
-    function authorPwdValidity(){
-        let isSuccess = true;
-        const author = document.getElementById('author-value').value;
-        const pwd = document.getElementById('pwd-value').value;
+    // function authorPwdValidity(){
+    //     let isSuccess = true;
+    //     const author = document.getElementById('author-value').value;
+    //     const pwd = document.getElementById('pwd-value').value;
 
-        if (author.length < 1 || /^\s*$/.test(author)) {
-            isSuccess=false;
-            const authorBox = document.getElementById('author-box');
+    //     if (author.length < 1 || /^\s*$/.test(author)) {
+    //         isSuccess=false;
+    //         const authorBox = document.getElementById('author-box');
             
-            if(!authorBox.querySelector('#test01')){
-                const feedback = document.createElement('div');
-                feedback.id = 'test01';
-                feedback.className = 'invalid-feedback';
-                feedback.textContent = '1~20자 입력';
+    //         if(!authorBox.querySelector('#test01')){
+    //             const feedback = document.createElement('div');
+    //             feedback.id = 'test01';
+    //             feedback.className = 'invalid-feedback';
+    //             feedback.textContent = '1~20자 입력';
 
-                const authorValue = document.getElementById('author-value');
-                authorValue.className = 'form-control is-invalid';
+    //             const authorValue = document.getElementById('author-value');
+    //             authorValue.className = 'form-control is-invalid';
                 
-                authorBox.appendChild(feedback);
-            }
-        }
-        if (pwd.length < 1 || /^\s*$/.test(pwd)) {
-            isSuccess=false;
-            const pwdBox = document.getElementById('pwd-box');
+    //             authorBox.appendChild(feedback);
+    //         }
+    //     }
+    //     if (pwd.length < 1 || /^\s*$/.test(pwd)) {
+    //         isSuccess=false;
+    //         const pwdBox = document.getElementById('pwd-box');
             
-            if(!pwdBox.querySelector('#test02')){
-                const feedback = document.createElement('div');
-                feedback.id = 'test02';
-                feedback.className = 'invalid-feedback';
-                feedback.textContent = '1~16자 입력';
+    //         if(!pwdBox.querySelector('#test02')){
+    //             const feedback = document.createElement('div');
+    //             feedback.id = 'test02';
+    //             feedback.className = 'invalid-feedback';
+    //             feedback.textContent = '1~16자 입력';
                 
-                const pwdValue = document.getElementById('pwd-value');
-                pwdValue.className = 'form-control is-invalid';
+    //             const pwdValue = document.getElementById('pwd-value');
+    //             pwdValue.className = 'form-control is-invalid';
 
-                pwdBox.appendChild(feedback);
-            }
-        }
+    //             pwdBox.appendChild(feedback);
+    //         }
+    //     }
 
-        if (isSuccess){
-            save(author, pwd);
-        }
-    }
+    //     if (isSuccess){
+    //         save(author, pwd);
+    //     }
+    // }
 
     function save(author, pwd) {
         const title = document.getElementById('title').value;
@@ -309,7 +297,7 @@
         const title = document.getElementById('title');
         const titleCount = document.getElementById('titleCount');
         const maxLength = 50;
-
+        
         title.addEventListener('input', () => {
             const currentLength = title.value.length;
             titleCount.textContent = `${currentLength}/${maxLength}`;
@@ -321,25 +309,7 @@
         });
     }
 
-    function contentLimitLength() {
-        // const content = document.getElementsByClassName('ProseMirror');
-        // const contentCount = document.getElementById('contentCount');
-        // const maxLength = 20000;
-        // console.log('content: ', content);
-
-        // const content = document.querySelectorAll('.ProseMirror')
-        // console.log('content: ', content);
-        // content.forEach(element => {
-        //     const p = element.getElementsByTagName('p');
-        //     if (p.length > 0){
-        //         // console.log("element: ", element.getElementsByTagName('p'));
-        //         p.addEventListener('input', () => {
-        //             console.log('입력!');
-        //         })
-        //     }
-        // });
-
-        
+    function contentLimitLength() {        
         editor.on('change', () => {
             const contentCount = document.getElementById('contentCount');
             const content = editor.getMarkdown();
@@ -351,9 +321,6 @@
                 editor.setMarkdown(content.substring(0, maxLength));
             }
         })
-
-        // const test = document.querySelector('.ProseMirror').children;
-        // console.log('자식 요소: ', test);
     }
 </script>
 </html>

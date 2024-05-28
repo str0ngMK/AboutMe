@@ -13,4 +13,6 @@ public interface BoardRepository extends JpaRepository<BoardEntity, Long>{
 	List<BoardEntity> findByDelYn(boolean delYn);
 
 	Optional<BoardEntity> findByNo(long no);
+
+	boolean existsByNoAndBoardPwd(long no, String pwd);
 }
