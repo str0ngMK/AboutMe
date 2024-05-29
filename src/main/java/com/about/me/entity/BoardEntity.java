@@ -36,6 +36,9 @@ public class BoardEntity extends BaseTimeEntity{
 	@Column(name = "image")
 	private String image;
 	
+	@Column(name = "tag")
+	private String tag;
+	
 	@Column(name = "author")
 	private String author;
 	
@@ -58,6 +61,7 @@ public class BoardEntity extends BaseTimeEntity{
 				.content(content)
 				.preview(preview)
 				.image(image)
+				.tag(tag)
 				.author(author)
 				.boardPwd(boardPwd)
 				.delYn(delYn)

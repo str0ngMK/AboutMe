@@ -11,6 +11,7 @@ public class ReqBoardDto {
 	private String content;
 	private String preview;
 	private String image;
+	private String[] tag;
 	private String author;
 	private String boardPwd;
 	private boolean delYn;

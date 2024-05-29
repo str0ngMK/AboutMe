@@ -82,6 +82,14 @@
         initialEditType: 'markdown',              // 최초로 보여줄 에디터 타입 (markdown || wysiwyg)
         initialValue: '',                        // 내용의 초기 값으로, 반드시 마크다운 문자열 형태여야 함
         previewStyle: 'vertical',                // 마크다운 프리뷰 스타일 (tab || vertical)
+        toolbarItems: [
+            ['heading', 'bold', 'italic', 'strike'],
+            ['hr', 'quote'],
+            ['ul', 'ol', 'indent', 'outdent'],
+            ['table', 'image', 'link'],
+            ['code', 'codeblock'],
+            ['scrollSync'],
+        ],
         hooks: {
             async addImageBlobHook(blob, callback) {
                 try {
@@ -137,6 +145,11 @@
             const title = document.getElementById('title');
             title.value = data.title;
             editor.setMarkdown(data.content);
+
+            const titleCount = document.getElementById('titleCount');
+            const maxLength = 50;
+            const currentLength = title.value.length;
+            titleCount.textContent = `${currentLength}/${maxLength}`;
         })
         .catch((error) => {
             console.log('Error: ', error);
@@ -157,82 +170,19 @@
             appendAlert("no content", "danger");
         }
         if (isSuccess) {
-            const modal = new bootstrap.Modal(document.getElementById('exampleModal'));
-            modal.show();
-
-            const author = document.getElementById('author-value');
-            author.focus();
-            author.addEventListener('input', () => {
-                const maxLength = 20;
-                const currentLength = author.value.length;
-                if (currentLength > maxLength){
-                    author.value = author.value.slice(0, maxLength);
-                }
-            });
-
-            const pwd = document.getElementById('pwd-value');
-            pwd.addEventListener('input', () => {
-                const maxLength = 16;
-                const currentLength = pwd.value.length;
-                if (currentLength > maxLength) {
-                    pwd.value = pwd.value.slice(0, maxLength);
-                }
-            })
+            update();
         }
     }
 
-    // function authorPwdValidity(){
-    //     let isSuccess = true;
-    //     const author = document.getElementById('author-value').value;
-    //     const pwd = document.getElementById('pwd-value').value;
-
-    //     if (author.length < 1 || /^\s*$/.test(author)) {
-    //         isSuccess=false;
-    //         const authorBox = document.getElementById('author-box');
-            
-    //         if(!authorBox.querySelector('#test01')){
-    //             const feedback = document.createElement('div');
-    //             feedback.id = 'test01';
-    //             feedback.className = 'invalid-feedback';
-    //             feedback.textContent = '1~20자 입력';
-
-    //             const authorValue = document.getElementById('author-value');
-    //             authorValue.className = 'form-control is-invalid';
-                
-    //             authorBox.appendChild(feedback);
-    //         }
-    //     }
-    //     if (pwd.length < 1 || /^\s*$/.test(pwd)) {
-    //         isSuccess=false;
-    //         const pwdBox = document.getElementById('pwd-box');
-            
-    //         if(!pwdBox.querySelector('#test02')){
-    //             const feedback = document.createElement('div');
-    //             feedback.id = 'test02';
-    //             feedback.className = 'invalid-feedback';
-    //             feedback.textContent = '1~16자 입력';
-                
-    //             const pwdValue = document.getElementById('pwd-value');
-    //             pwdValue.className = 'form-control is-invalid';
-
-    //             pwdBox.appendChild(feedback);
-    //         }
-    //     }
-
-    //     if (isSuccess){
-    //         save(author, pwd);
-    //     }
-    // }
-
-    function save(author, pwd) {
+    function update() {
         const title = document.getElementById('title').value;
         const content = editor.getMarkdown();
         const preview = editor.getHTML().replace(/<[^>]*>/g, "").substring(0, 20);
 
-        const formData = { title : title, content : content, preview : preview, author : author, boardPwd : pwd };
+        const formData = { title : title, content : content, preview : preview };
 
-        fetch("/board/save", {
-            method : 'POST',
+        fetch("/board/update", {
+            method : 'PUT',
             headers: {
                 'Content-Type': 'application/json'
             },
@@ -246,6 +196,7 @@
         })
         .then((data) => {
             if(data.result){
+                alert('수정이 완료되었습니다.');
                 window.location.href='/board/list';
             } else {
                 alert(data.message);
@@ -297,12 +248,18 @@
         const title = document.getElementById('title');
         const titleCount = document.getElementById('titleCount');
         const maxLength = 50;
-        
-        title.addEventListener('input', () => {
+
+        function updateTitleCount() {
             const currentLength = title.value.length;
             titleCount.textContent = `${currentLength}/${maxLength}`;
+        }
+
+        updateTitleCount();
+        
+        title.addEventListener('input', () => {
+            updateTitleCount();
             
-            if (currentLength > maxLength){
+            if (title.value.length > maxLength){
                 title.value = title.value.slice(0, maxLength);
                 titleCount.textContent = `${maxLength}/${maxLength}`;
             }

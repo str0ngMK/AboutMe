@@ -39,7 +39,7 @@ public class BoardController {
 	@GetMapping("/get")
 	public ResponseEntity<ReqBoardDto> getBoard(@RequestParam(name = "no") long no){
 		ReqBoardDto result = boardService.getBoard(no);
-		if (result == null) {
+		if (result == null || result.isDelYn()) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
 		}
 		return ResponseEntity.ok().body(result);
@@ -93,23 +93,26 @@ public class BoardController {
     	return ResponseEntity.ok().body(result);
     }
     
-    @GetMapping("/test")
-    public ResponseEntity<ReqBoardDto> modifyBoard(HttpSession session){
-//    	Map<String, Object> result = new HashMap<>();
-//    	boolean isPwdCheck = boardService.checkBoardPwd(body.getNo(), body.getBoardPwd());
-//    	if (!isPwdCheck) {
-//    		result.put("result", false);
-//    		result.put("message", "비밀번호를 확인 해 주세요.");
-//    		return ResponseEntity.ok().body(result);
-//    	}
+    @PutMapping("/update")
+    public ResponseEntity<Map<String, Object> > updateBoard(HttpSession session, @RequestBody ReqBoardDto body, HttpServletRequest request, HttpServletResponse response){
+    	Map<String, Object> result = new HashMap<>();
+    	if(session.getAttribute("result") == null || !(boolean) session.getAttribute("result")) {
+    		result.put("result", false);
+    		result.put("message", "잘못 된 요청 입니다.");
+    		return ResponseEntity.ok().body(result);
+    	}
+    	boolean isUpdateResult = boardService.updateBoard(session, body, request, response);
+    	if(!isUpdateResult) {
+    		result.put("result", false);
+    		result.put("message", "문제가 발생 하였습니다. 잠시 후 다시 시도 해 주세요.");
+    		return ResponseEntity.ok().body(result);
+    	}
+    	// 세션 삭제
+    	session.invalidate();
     	
-    	return null;
-//    	String pwd = String.valueOf(body.get("pwd"));
-//    	if (!pwd.equals("123")) {
-//    		return "/error";
-//    	}
-//    	return "board_write";
-//    	return ResponseEntity.ok().body(boardService.modifyBoard(no));
+    	result.put("result", true);
+    	result.put("message", "");
+    	return ResponseEntity.ok().body(result);
     }
     
 }

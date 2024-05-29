@@ -31,13 +31,13 @@ import jakarta.servlet.http.HttpSession;
 
 @Service
 public class BoardService {
-	
+
 	@Autowired
 	private BoardRepository boardRepository;
-	
+
 	@Autowired
 	private ApplicationConfig applicationConfig;
-	
+
 	public List<ReqBoardDto> getBoardList() {
 		List<BoardEntity> list = boardRepository.findByDelYn(false);
 		List<ReqBoardDto> result = new ArrayList<>();
@@ -54,8 +54,7 @@ public class BoardService {
 		}
 		return result;
 	}
-	
-	
+
 	public ReqBoardDto getBoard(long no) {
 		Optional<BoardEntity> result = boardRepository.findByNo(no);
 		ReqBoardDto dto = new ReqBoardDto();
@@ -65,7 +64,9 @@ public class BoardService {
 			dto.setTitle(entity.toDto().getTitle());
 			dto.setContent(entity.toDto().getContent());
 			dto.setImage(entity.toDto().getImage());
+			dto.setTag(entity.toDto().getTag().split(","));
 			dto.setAuthor(entity.toDto().getAuthor());
+			dto.setDelYn(entity.toDto().isDelYn());
 			dto.setInsDate(entity.getInsDate());
 			dto.setUpdDate(entity.getUpdDate());
 		} else {
@@ -73,76 +74,76 @@ public class BoardService {
 		}
 		return dto;
 	}
-	
+
 	public boolean isBoard(long no) {
 		boolean result = false;
 		Optional<BoardEntity> board = boardRepository.findByNo(no);
 		if (board.isPresent()) {
 			BoardDto dto = board.get().toDto();
-			if(!dto.isDelYn()) {
+			if (!dto.isDelYn()) {
 				result = true;
 			}
 		}
 		return result;
 	}
-	
-	public String uploadImage(MultipartFile image, HttpServletResponse response){
+
+	public String uploadImage(MultipartFile image, HttpServletResponse response) {
 		String uploadDir = applicationConfig.getImgRepoPath();
-		
+
 		if (image.isEmpty()) {
 			return "";
 		}
-		
+
 		String orgFilename = image.getOriginalFilename();
 		String uuid = UUID.randomUUID().toString().replaceAll("-", "");
 		String extension = orgFilename.substring(orgFilename.lastIndexOf(".") + 1);
 		String saveFilename = uuid + "." + extension;
 		String fileFullPath = Paths.get(uploadDir, saveFilename).toString();
-		
+
 		File dir = new File(uploadDir);
 		if (dir.exists() == false) {
 			throw new RuntimeException();
 		}
-		
+
 		try {
 			File uploadFile = new File(fileFullPath);
 			image.transferTo(uploadFile);
-			
+
 			Cookie cookie = new Cookie(saveFilename, "filename");
 			cookie.setHttpOnly(true);
 			cookie.setSecure(true);
 			cookie.setPath("/");
 			cookie.setMaxAge(7 * 24 * 60 * 60);
 			response.addCookie(cookie);
-			
+
 			return saveFilename;
-		} catch(IOException e) {
+		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
-	
+
 	public byte[] printImage(String filename) {
 		String uploadDir = applicationConfig.getImgRepoPath();
 		// 업로드된 파일의 전체 경로
-        String fileFullPath = Paths.get(uploadDir, filename).toString();
+		String fileFullPath = Paths.get(uploadDir, filename).toString();
 
-        // 파일이 없는 경우 예외 throw
-        File uploadedFile = new File(fileFullPath);
-        if (uploadedFile.exists() == false) {
-            throw new RuntimeException();
-        }
+		// 파일이 없는 경우 예외 throw
+		File uploadedFile = new File(fileFullPath);
+		if (uploadedFile.exists() == false) {
+			throw new RuntimeException();
+		}
 
-        try {
-            // 이미지 파일을 byte[]로 변환 후 반환
-            byte[] imageBytes = Files.readAllBytes(uploadedFile.toPath());
-            return imageBytes;
+		try {
+			// 이미지 파일을 byte[]로 변환 후 반환
+			byte[] imageBytes = Files.readAllBytes(uploadedFile.toPath());
+			return imageBytes;
 
-        } catch (IOException e) {
-            // 예외 처리는 따로 해주는 게 좋습니다.
-            throw new RuntimeException(e);
-        }
+		} catch (IOException e) {
+			// 예외 처리는 따로 해주는 게 좋습니다.
+			throw new RuntimeException(e);
+		}
 	}
-	
+
 	public Map<String, Object> saveBoard(ReqBoardDto body, HttpServletRequest request, HttpServletResponse response) {
 		Map<String, Object> result = new HashMap<>();
 		BoardDto dto = new BoardDto();
@@ -156,16 +157,25 @@ public class BoardService {
 			String image = realImage.size() == 0 ? null : realImage.get(0);
 			String author = body.getAuthor();
 			String boardPwd = body.getBoardPwd();
-			
+			String tag = null;
+			for (String tagName : body.getTag()) {
+				if (tag == null) {
+					tag = tagName;
+				} else {
+					tag += "," + tagName;
+				}
+			}
+
 			dto.setTitle(title);
 			dto.setContent(content);
 			dto.setPreview(preview);
 			dto.setImage(image);
+			dto.setTag(tag);
 			dto.setAuthor(author);
 			dto.setBoardPwd(boardPwd);
-			
+
 //			getRealImg(content);
-			
+
 			boardRepository.saveAndFlush(dto.toEntity());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -174,13 +184,13 @@ public class BoardService {
 			return result;
 		} finally {
 			Cookie[] cookies = request.getCookies();
-			
-			if(cookies != null) {
-				for (Cookie cookie: cookies) {
+
+			if (cookies != null) {
+				for (Cookie cookie : cookies) {
 					if (cookie.getValue().equals("filename")) {
 						if (realImage.size() != 0) {
 							for (String filename : getRealImg(content)) {
-								if (!cookie.getName().equals(filename) ) {
+								if (!cookie.getName().equals(filename)) {
 									deleteImage(cookie.getName());
 								}
 							}
@@ -193,54 +203,53 @@ public class BoardService {
 					}
 				}
 			}
-		} 
+		}
 		result.put("result", true);
 		result.put("message", "저장 완료");
-		
+
 		return result;
 	}
-	
+
 	private void deleteImage(String filename) {
 		String uploadDir = applicationConfig.getImgRepoPath();
 		Path path = Paths.get(uploadDir + filename);
 		try {
 			Files.delete(path);
-		} catch(Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	private List<String> getRealImg(String content) {
 		List<String> image = new ArrayList<>();
-		
+
 		Pattern pattern = Pattern.compile("/board/image-print\\?filename=([^&)]+)");
 		Matcher matcher = pattern.matcher(content);
-		
-		
-		while(matcher.find()) {
+
+		while (matcher.find()) {
 			image.add(matcher.group(1));
 		}
 //		if (matcher.find()) {
 //			image = matcher.group(1);
 //		}
-		
+
 		return image;
-				
+
 //		while(matcher.find()) {
 //			System.out.println("찾은 패턴: " + matcher.group());
 //		}
-		
+
 //        String fileFullPath = Paths.get(uploadDir, filename).toString();
 //
 //        // 파일이 없는 경우 예외 throw
 //        File uploadedFile = new File(fileFullPath);
 	}
-	
+
 	public void deleteCookie(HttpServletRequest request, HttpServletResponse response) {
 		Cookie[] cookies = request.getCookies();
-		
-		if(cookies != null) {
-			for (Cookie cookie: cookies) {
+
+		if (cookies != null) {
+			for (Cookie cookie : cookies) {
 				if (cookie.getValue().equals("filename")) {
 					cookie.setPath("/");
 					cookie.setMaxAge(0);
@@ -249,7 +258,7 @@ public class BoardService {
 			}
 		}
 	}
-	
+
 	public boolean checkBoardPwd(HttpSession session, long no, String pwd) {
 		boolean result = boardRepository.existsByNoAndBoardPwd(no, pwd);
 		if (result) {
@@ -258,7 +267,7 @@ public class BoardService {
 		}
 		return result;
 	}
-	
+
 	public boolean deleteBoard(long no) {
 		Optional<BoardEntity> result = boardRepository.findByNo(no);
 		if (result.isPresent()) {
@@ -274,16 +283,63 @@ public class BoardService {
 		}
 		return true;
 	}
-	
-	public ReqBoardDto modifyBoard(HttpSession session) {
-		Optional<BoardEntity> result = boardRepository.findByNo((long)session.getAttribute("board"));
-		ReqBoardDto dto = new ReqBoardDto();
-		if(result.isPresent()) {
-			BoardEntity entity = result.get();
-			dto.setTitle(entity.toDto().getTitle());
-			dto.setContent(entity.toDto().getContent());
+
+//	public ReqBoardDto modifyBoard(HttpSession session) {
+//		Optional<BoardEntity> result = boardRepository.findByNo((long)session.getAttribute("board"));
+//		ReqBoardDto dto = new ReqBoardDto();
+//		if(result.isPresent()) {
+//			BoardEntity entity = result.get();
+//			dto.setTitle(entity.toDto().getTitle());
+//			dto.setContent(entity.toDto().getContent());
+//		}
+//		return dto;
+//	}
+
+	public boolean updateBoard(HttpSession session, ReqBoardDto body, HttpServletRequest request, HttpServletResponse response) {
+		boolean result = false;
+		String content = null;
+		List<String> realImage = null;
+		try {
+			Optional<BoardEntity> board = boardRepository.findByNo((long) session.getAttribute("board"));
+			if (board.isPresent()) {
+				content = body.getContent();
+				realImage = getRealImg(content);
+				String image = realImage.size() == 0 ? null : realImage.get(0);
+				
+				BoardDto dto = board.get().toDto();
+				dto.setTitle(body.getTitle());
+				dto.setContent(content);
+				dto.setPreview(body.getPreview());
+				dto.setImage(image);
+
+				boardRepository.saveAndFlush(dto.toEntity());
+				result = true;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			Cookie[] cookies = request.getCookies();
+
+			if (cookies != null) {
+				for (Cookie cookie : cookies) {
+					if (cookie.getValue().equals("filename")) {
+						if (realImage.size() != 0) {
+							for (String filename : getRealImg(content)) {
+								if (!cookie.getName().equals(filename)) {
+									deleteImage(cookie.getName());
+								}
+							}
+						} else {
+							deleteImage(cookie.getName());
+						}
+						cookie.setPath("/");
+						cookie.setMaxAge(0);
+						response.addCookie(cookie);
+					}
+				}
+			}
 		}
-		return dto;
+		return result;
 	}
 
 }

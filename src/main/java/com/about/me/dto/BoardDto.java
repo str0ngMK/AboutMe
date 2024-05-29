@@ -14,17 +14,19 @@ public class BoardDto {
 	private String content;
 	private String preview;
 	private String image;
+	private String tag;
 	private String author;
 	private String boardPwd;
 	private boolean delYn;
 	
 	@Builder
-	public BoardDto(long no, String title, String content, String preview, String image, String author, String boardPwd, boolean delYn) {
+	public BoardDto(long no, String title, String content, String preview, String image, String tag, String author, String boardPwd, boolean delYn) {
 		this.no=no;
 		this.title=title;
 		this.content=content;
 		this.preview=preview;
 		this.image=image;
+		this.tag=tag;
 		this.author=author;
 		this.boardPwd=boardPwd;
 		this.delYn=delYn;
@@ -37,6 +39,7 @@ public class BoardDto {
 				.content(content)
 				.preview(preview)
 				.image(image)
+				.tag(tag)
 				.author(author)
 				.boardPwd(boardPwd)
 				.delYn(delYn)
