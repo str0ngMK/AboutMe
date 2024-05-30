@@ -13,6 +13,30 @@
     <link rel="stylesheet" type="text/css" href="/css/nav.css" />
 </head>
 <style>
+	.container {
+		max-width: 768px;
+	}
+
+	#alertRow{
+        position: fixed;
+        display: flex;
+        flex-direction: column;
+        z-index: 2;
+        
+        bottom: 0px;
+	    left: 0px;
+	    right: 0px;
+    }
+
+	#title {
+		font-weight: bold;
+	}
+
+	#author{
+		white-space: nowrap;
+		font-weight: bold;
+	}
+
 	.content p{
 		word-wrap: break-word;
 	}
@@ -30,22 +54,34 @@
 		white-space: nowrap;
 	}
 
-	/* #modify{
-		display: flex;
-		align-items: center;
-	}
-
-	#delete{
-		display: flex;
-		align-items: center;
-	} */
-
 	.badge {
         margin-top: 10px;
         margin-right: 10px;
         height: 25px;
         line-height: 16px;
+
+		font-size: 15px;
+		font-weight: 500;
+		background-color: #f8f9fa;
+		color: #0d6efd;
     }
+	.toast-custom-viewer {
+		margin-top: 50px;
+		margin-bottom: 50px;
+	}
+
+	#reply{
+		resize: none;
+	}
+
+	#modify{
+		border-radius: 25px;
+	}
+	
+	#delete {
+		border-radius: 25px;
+		margin-left: 10px;
+	}
 
 </style>
 <body>
@@ -92,26 +128,27 @@
         </div>
     </div>
 	<div class="container" id="board">
-		<div class="row">
+		<div class="row" id="alertRow"></div>
+		<div class="row pb-3">
 			<div class="col">
 				<!-- 제목 -->
-				<p id="title"></p>
+				<h2 id="title"></h2>
 			</div>
 		</div>
 		<div class="row">
-			<div class="col-md-9" style="display: flex; flex-direction: column; justify-content: space-between;">
+			<div class="col" style="display: flex; flex-direction: column; justify-content: space-between;">
 				<!-- 작성자 -->
-				<small id="author"></small>
+				<h6 id="author"></h6>
 			</div>
 			<div class="col">
 				<div class="row">
-					<div class="col">
+					<div class="col d-flex justify-content-end">
 						<!-- 작성일 -->
 						<small class="date" id="insDate"></small>
 					</div>
 				</div>
 				<div class="row">
-					<div class="col">
+					<div class="col d-flex justify-content-end">
 						<!-- 수정일 -->
 						<small class="date" id="updDate"></small>
 					</div>
@@ -122,15 +159,47 @@
 			<div class="col-10">
 				<div id="tag"></div>
 			</div>
-			<div class="col ">
+			<div class="col d-flex justify-content-end" style="white-space: nowrap;">
 				<!-- 수정 버튼 -->
-				<button class="btn btn-outline-secondary" id="modify" onclick="showModal('M')">수정</button>
+				<button class="btn btn-outline-primary" id="modify" onclick="showModal('M')">수정</button>
 				<!-- 삭제 버튼 -->
-				<button class="btn btn-outline-secondary" id="delete" onclick="showModal('D')">삭제</button>
+				<button class="btn btn-outline-primary" id="delete" onclick="showModal('D')">삭제</button>
 			</div>
 		</div>
 		<hr>
 		<div class="toast-custom-viewer"></div>
+		<hr>
+		<div class="row d-flex justify-content-center pt-5">
+			<div class="col-11">
+				<p>0개의 댓글</p>
+			</div>
+		</div>
+		<div class="row d-flex justify-content-center">
+			<div class="col-11">
+				<div class="input-group mb-3">
+					<span class="input-group-text" id="basic-addon1">작성자</span>
+					<input type="text" class="form-control" id="reply_author" aria-describedby="basic-addon1">
+					<span class="input-group-text" id="basic-addon2">비밀번호</span>
+					<input type="password" class="form-control" id="reply_pwd" aria-describedby="basic-addon2">
+				</div>
+			</div>
+		</div>
+		<div class="row d-flex justify-content-center">
+			<div class="col-11 pb-3">
+				<textarea class="form-control" placeholder="댓글을 작성하세요" id="reply" rows="2"></textarea>
+			</div>
+		</div>
+		<div class="row d-flex justify-content-center">
+			<div class="col-11 d-flex justify-content-end">
+				<button type="button" class="btn btn-primary" onclick="saveReply();">댓글 작성</button>
+			</div>
+		</div>
+		<div id="reply_list">
+			<div class="row">
+				<div class="col">
+				</div>
+			</div>
+		</div>
 	</div>
 </body>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -162,6 +231,7 @@
 
 	window.onload = function() {
     	getBoard();
+		getReply();
     }
 
 	function getBoard() {
@@ -185,6 +255,46 @@
 				console.log('block: ', block);
 			hljs.highlightBlock(block);
 		});
+		})
+		.catch((error) => {
+          	console.error("Error:", error);
+        });
+	}
+
+	function getReply(){
+		fetch("/reply/get?no=" + no)
+        .then((response) => {
+			if(response.ok){
+				return response.json();
+			}
+			window.location.href = "/error";
+        })
+        .then((data) => {
+			console.log('result: ', data);
+			const replyList = document.getElementById('reply_list');
+
+			data.forEach(element => {
+				let row = document.createElement('div');
+				row.className = 'row';
+	
+				let col = document.createElement('div');
+				col.className = 'col';
+	
+				let author = document.createElement('p');
+				author.textContent = '작성자: ' + element.author;
+	
+				let content = document.createElement('p');
+				content.textContent = '내용: ' + element.content;
+	
+				let insDate = document.createElement('p');
+				insDate.textContent = '작성일: ' + element.insDate;
+
+				col.appendChild(author);
+				col.appendChild(content);
+				col.appendChild(insDate);
+				row.appendChild(col);
+				replyList.appendChild(row);
+			})
 		})
 		.catch((error) => {
           	console.error("Error:", error);
@@ -361,31 +471,6 @@
         });
 	}
 
-	function modifyBoard(pwd){
-		const formData = { no : no, boardPwd : pwd };
-
-		fetch("/board/modify", {
-			method : 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body : JSON.stringify(formData),
-		})
-		.then((response) => {
-			if(response.ok){
-				return response.json();
-			}
-			window.location.href = "/error";
-		})
-		.then((data) => {
-
-
-		})
-		.catch((error) => {
-
-		});
-	}
-
 	function deleteBoard(pwd){
 		// const formData = { no : no, boardPwd : pwd };
 
@@ -411,7 +496,7 @@
 			}
 		})
 		.catch((error) => {
-
+			console.error('Error: ', error);
 		});
 	}
 
@@ -426,7 +511,8 @@
 
 		dataTag.forEach(text => {
 			let span = document.createElement('span');
-			span.className = 'badge text-bg-secondary';
+			// span.className = 'badge text-bg-secondary';
+			span.className = 'badge';
 			span.id = 'badge';
 			span.textContent = text;
 
@@ -440,5 +526,83 @@
 		}
 		return element;
 	}
+
+	function saveReply(){
+		const replyAuthor = document.getElementById('reply_author').value;
+		const reply = document.getElementById('reply').value;
+		const pwd = document.getElementById('reply_pwd').value;
+
+		if (replyValidity(replyAuthor, reply, pwd)){
+			console.log('작성자: ', replyAuthor);
+			const formData = { author: replyAuthor, content: reply, boardNo:no, replyPwd: pwd };
+			fetch("/reply/save" ,{
+				method : 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body : JSON.stringify(formData),
+			})
+			.then((response) => {
+				if(response.ok){
+					return response.json();
+				}
+				window.location.href = "/error";
+			})
+			.then((data) => {
+				if(data.result){
+					location.reload();
+				} else {
+					alert(data.message);
+				}
+			})
+			.catch((error) => {
+				console.error('Error: ', error);
+			});
+		}
+	}
+
+	function replyValidity(replyAuthor, reply, pwd) {
+		let isSuccess = true;
+		if (replyAuthor.length < 1 || /^\s*$/.test(replyAuthor)) {
+            isSuccess = false;
+            appendAlert("no author", "danger");
+        } 
+        if (reply.length < 1 || /^\s*$/.test(reply)) {
+            isSuccess = false;
+            appendAlert("no reply", "danger");
+        }
+		if (pwd.length < 1 || /^\s*$/.test(pwd)) {
+			isSuccess = false;
+			appendAlert("no password", "danger");
+		}
+		return isSuccess;
+	}
+
+	function appendAlert(message, type) {
+        const alertRow = document.getElementById('alertRow');
+        
+        const col = document.createElement('div');
+        col.className = 'col';
+
+        const wrapper = document.createElement('div');
+        wrapper.className = `alert alert-${type} alert-dismissible`;
+        wrapper.role = 'alert';
+        wrapper.style.marginLeft = '16px';
+        wrapper.style.marginRight = '16px';
+
+        const msg = document.createElement('div');
+        msg.textContent = `${message}`;
+
+        const btn = document.createElement('div');
+        btn.type = 'button';
+        btn.className = 'btn-close';
+        btn.setAttribute("data-bs-dismiss", "alert");
+        btn.setAttribute("aria-label", "Close");
+
+        wrapper.appendChild(msg);
+        wrapper.appendChild(btn);
+        col.appendChild(wrapper);
+        alertRow.appendChild(col);
+    }
 </script>
 </html>

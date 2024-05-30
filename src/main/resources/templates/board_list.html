@@ -9,28 +9,23 @@
     <link rel="stylesheet" type="text/css" href="/css/nav.css" />
   </head>
   <style>
-    #btn_col{
+    .container{
       max-width: 768px;
-      display: flex;
-      justify-content: flex-end;
-      padding-bottom: 12px;
+    }
+    #board{
+      width: 100%;
     }
   </style>
   <body>
     <nav th:replace="~{nav/nav :: nav}"></nav>
     <div class="container">
-      <div class="row d-flex justify-content-center">
-        <div class="col" id="btn_col">
+      <div class="row">
+        <div class="col p-3">
           <button type="button" class="btn btn-outline-primary" onclick="getBoardWrite()">글 작성</button>
         </div>
       </div>
       <div class="row">
         <div class="col d-flex justify-content-center">
-          <!-- <div class="row">
-            <div class="col">
-              <button type="button" class="btn btn-outline-primary">글 작성</button>
-            </div>
-          </div> -->
           <div id="board">
             <!-- <img src="/file/java.png" /> -->
           </div>
@@ -72,7 +67,8 @@
 
             let card = document.createElement('div');
             card.className = 'card mb-3';
-            card.style.width = '768px';
+            // card.style.maxWidth = '768px';
+            // card.style.maxWidth = '100%';
 
             let a = document.createElement('a');
             a.href = '/board?no=' + element.no;
@@ -84,6 +80,7 @@
             title.className = 'card-title';
             title.textContent = element.title;
             title.style.textDecoration = 'none';
+            title.style.fontWeight = 'bold';
             title.href = '/board?no=' + element.no;
             
             let content = document.createElement('p');

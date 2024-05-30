@@ -56,7 +56,7 @@ public class BoardService {
 	}
 
 	public ReqBoardDto getBoard(long no) {
-		Optional<BoardEntity> result = boardRepository.findByNo(no);
+		Optional<BoardEntity> result = boardRepository.findByNoAndDelYn(no, false);
 		ReqBoardDto dto = new ReqBoardDto();
 		if (result.isPresent()) {
 			BoardEntity entity = result.get();
@@ -64,7 +64,8 @@ public class BoardService {
 			dto.setTitle(entity.toDto().getTitle());
 			dto.setContent(entity.toDto().getContent());
 			dto.setImage(entity.toDto().getImage());
-			dto.setTag(entity.toDto().getTag().split(","));
+			String tag = entity.toDto().getTag();
+			dto.setTag(tag == null ? new String[0] : tag.split(","));
 			dto.setAuthor(entity.toDto().getAuthor());
 			dto.setDelYn(entity.toDto().isDelYn());
 			dto.setInsDate(entity.getInsDate());

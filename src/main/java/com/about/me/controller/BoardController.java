@@ -39,9 +39,9 @@ public class BoardController {
 	@GetMapping("/get")
 	public ResponseEntity<ReqBoardDto> getBoard(@RequestParam(name = "no") long no){
 		ReqBoardDto result = boardService.getBoard(no);
-		if (result == null || result.isDelYn()) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-		}
+//		if (result == null || result.isDelYn()) {
+//			return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+//		}
 		return ResponseEntity.ok().body(result);
 	}
 	

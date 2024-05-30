@@ -3,7 +3,7 @@ package com.about.me.entity;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
-import com.about.me.dto.BoardDto;
+import com.about.me.dto.ReplyDto;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -12,53 +12,42 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
 
-@Entity(name = "board")
+@Entity(name = "reply")
 @DynamicInsert
 @DynamicUpdate
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class BoardEntity extends BaseTimeEntity{
+public class ReplyEntity extends BaseTimeEntity{
 
 	@Id
 	@Column(name = "no")
 	private long no;
 	
-	@Column(name = "title")
-	private String title;
+	@Column(name = "author")
+	private String author;
 	
 	@Column(name = "content")
 	private String content;
 	
-	@Column(name = "preview")
-	private String preview;
-	
-	@Column(name = "image")
-	private String image;
-	
-	@Column(name = "tag")
-	private String tag;
-	
-	@Column(name = "author")
-	private String author;
-	
-	@Column(name = "board_pwd")
-	private String boardPwd;
+	@Column(name = "board_no")
+	private long boardNo;
 	
 	@Column(name = "del_yn")
 	private boolean delYn;
 	
-	public BoardDto toDto() {
-		return BoardDto.builder()
+	@Column(name = "reply_pwd")
+	private String replyPwd;
+	
+	
+	public ReplyDto toDto() {
+		return ReplyDto.builder()
 				.no(no)
-				.title(title)
-				.content(content)
-				.preview(preview)
-				.image(image)
-				.tag(tag)
 				.author(author)
-				.boardPwd(boardPwd)
+				.content(content)
+				.boardNo(boardNo)
 				.delYn(delYn)
+				.replyPwd(replyPwd)
 				.build();
 	}
 }
