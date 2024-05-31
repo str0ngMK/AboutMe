@@ -115,4 +115,10 @@ public class BoardController {
     	return ResponseEntity.ok().body(result);
     }
     
+    @GetMapping("/search")
+    public ResponseEntity<?> searchBoard(@RequestParam(name="keyword") String keyword) {
+    	return ResponseEntity.ok().body(boardService.searchBoard(keyword));
+    }
+    
+    
 }

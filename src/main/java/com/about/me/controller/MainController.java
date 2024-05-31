@@ -44,15 +44,11 @@ public class MainController {
 	
 	@GetMapping("/board/modify")
 	public String boardModify(HttpSession session, @RequestParam(name = "no") long no) {
+		System.out.println("no = " + no);
 		if(session.getAttribute("result") != null && (boolean)session.getAttribute("result") && ((long)session.getAttribute("board") == no)) {
 			return "board_modify";
 		}
 		return "/error";
 	}
-	
-//	@GetMapping("/nav")
-//	public String nav() {
-//		return "nav/nav";
-//	}
 	
 }

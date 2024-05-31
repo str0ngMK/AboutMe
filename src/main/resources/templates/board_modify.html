@@ -60,10 +60,13 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
 <script type="text/javascript">
-    const urlParams = new URLSearchParams(window.location.search);
-    const no = urlParams.get('no');
+    let urlParams;
+    let no;
 
     window.onload = function() {
+        urlParams = new URLSearchParams(window.location.search);
+        no = urlParams.get('no');
+
         getBoard();
         titleReSize();
         titleLimitLength();
@@ -195,7 +198,8 @@
         .then((data) => {
             if(data.result){
                 alert('수정이 완료되었습니다.');
-                window.location.href='/board/list';
+                window.location.href= "/board?no=" + no;
+                // location.reload();
             } else {
                 alert(data.message);
             }

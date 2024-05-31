@@ -13,4 +13,8 @@ public interface ReplyRepository extends JpaRepository<ReplyEntity, Long>{
 
 	List<ReplyEntity> findByBoardNoAndDelYn(long no, boolean delYn);
 
+	boolean existsByNoAndReplyPwd(long no, String pwd);
+
+	Optional<ReplyEntity> findByNo(long no);
+
 }

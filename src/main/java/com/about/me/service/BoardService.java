@@ -342,5 +342,44 @@ public class BoardService {
 		}
 		return result;
 	}
+	
+	public List<ReqBoardDto> searchBoard(String keyword) {
+		List<ReqBoardDto> result = new ArrayList<>();
+		keyword = removeSpaces(keyword);
+		List<BoardEntity> searchResult = boardRepository.findByKeyword(keyword);
+		if(searchResult.size() > 0) {
+			for (BoardEntity entity : searchResult) {
+				ReqBoardDto dto = new ReqBoardDto();
+				dto.setNo(entity.toDto().getNo());
+				dto.setTitle(entity.toDto().getTitle());
+				dto.setContent(entity.toDto().getContent());
+				dto.setAuthor(entity.toDto().getAuthor());
+				dto.setInsDate(entity.getInsDate());
+				dto.setUpdDate(entity.getUpdDate());
+				result.add(dto);
+			}
+		}
+		return result;
+	}
+	
+	private String removeSpaces(String keyword) {
+		String result;
+		int start = 0;
+        int end = keyword.length() - 1;
+
+        while (start < keyword.length() && keyword.charAt(start) == ' ') {
+            start++;
+        }
+
+        while (end >= 0 && keyword.charAt(end) == ' ') {
+            end--;
+        }
+
+        result = keyword.substring(start, end + 1);
+        result = "%" + result + "%";
+        result = result.replaceAll("\\s+", "%");
+        
+        return result;
+	}
 
 }

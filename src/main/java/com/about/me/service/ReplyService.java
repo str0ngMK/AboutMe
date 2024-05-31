@@ -2,6 +2,7 @@ package com.about.me.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -10,6 +11,8 @@ import com.about.me.dto.ReplyDto;
 import com.about.me.dto.req.ReqReplyDto;
 import com.about.me.entity.ReplyEntity;
 import com.about.me.repository.ReplyRepository;
+
+import jakarta.servlet.http.HttpSession;
 
 @Service
 public class ReplyService {
@@ -44,6 +47,7 @@ public class ReplyService {
 		if (replyResult.size() > 0) {
 			for (ReplyEntity entity : replyResult) {
 				ReqReplyDto dto = new ReqReplyDto();
+				dto.setNo(entity.toDto().getNo());
 				dto.setAuthor(entity.toDto().getAuthor());
 				dto.setContent(entity.toDto().getContent());
 				dto.setInsDate(entity.getInsDate());
@@ -51,6 +55,32 @@ public class ReplyService {
 			}
 		}
 		return result;
+	}
+	
+	public boolean checkReplyPwd (HttpSession session, long no, String pwd) {
+		boolean result = replyRepository.existsByNoAndReplyPwd(no, pwd);
+		if (result) {
+			session.setAttribute("reply", no);
+			session.setAttribute("result", true);
+		}
+		return result;
+	}
+	
+	public boolean deleteReply (long no) {
+		Optional<ReplyEntity> result = replyRepository.findByNo(no);
+		if (result.isPresent()) {
+			try {
+				ReplyDto dto = result.get().toDto();
+				dto.setDelYn(true);
+				replyRepository.saveAndFlush(dto.toEntity());
+			} catch (Exception e) {
+				e.printStackTrace();
+				return false;
+			}
+		} else {
+			return false;
+		}
+		return true;
 	}
 
 }

@@ -72,6 +72,7 @@
 
 	#reply{
 		resize: none;
+		overflow: hidden;
 	}
 
 	#modify{
@@ -83,14 +84,36 @@
 		margin-left: 10px;
 	}
 
+	#reply_list {
+		margin-top: 6rem;
+	}
+
+	#reply_count{
+		font-weight: bold;
+	}
+
+	#modify_reply:disabled,
+	#delete_reply:disabled,
+	#modify_reply.disabled,
+	#delete_reply.disabled {
+		color: #fff;
+		border-color: #fff;
+	}
+
+	#reply_content{
+		overflow-wrap: break-word;
+		margin-top: 1rem;
+		margin-bottom: 1rem;
+	}
+
 </style>
 <body>
 	<nav th:replace="~{nav/nav :: nav}"></nav>
 	<div class="modal" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-		<!-- <div class="modal-dialog modal-dialog-centered">
+		<div class="modal-dialog modal-dialog-centered">
 			<div class="modal-content">
 			  <div class="modal-header">
-				<h1 class="modal-title" id="deleteModalLabel">안내</h1>
+				<h5 class="modal-title" id="deleteModalLabel">안내</h5>
 				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 			  </div>
 			  <div class="modal-body">
@@ -100,10 +123,10 @@
 			  </div>
 			  <div class="modal-footer">
 				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
-				<button type="button" class="btn btn-primary" onclick="pwdValidity()">확인</button>
+				<button type="button" class="btn btn-primary" id="deleteBtn">확인</button>
 			  </div>
 			</div>
-		</div> -->
+		</div>
 	</div>
 	<div class="modal" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -161,9 +184,9 @@
 			</div>
 			<div class="col d-flex justify-content-end" style="white-space: nowrap;">
 				<!-- 수정 버튼 -->
-				<button class="btn btn-outline-primary" id="modify" onclick="showModal('M')">수정</button>
+				<button class="btn btn-outline-primary" id="modify" onclick="showModal('B', 'M')">수정</button>
 				<!-- 삭제 버튼 -->
-				<button class="btn btn-outline-primary" id="delete" onclick="showModal('D')">삭제</button>
+				<button class="btn btn-outline-primary" id="delete" onclick="showModal('B', 'D')">삭제</button>
 			</div>
 		</div>
 		<hr>
@@ -171,7 +194,7 @@
 		<hr>
 		<div class="row d-flex justify-content-center pt-5">
 			<div class="col-11">
-				<p>0개의 댓글</p>
+				<p id="reply_count">0개의 댓글</p>
 			</div>
 		</div>
 		<div class="row d-flex justify-content-center">
@@ -186,7 +209,7 @@
 		</div>
 		<div class="row d-flex justify-content-center">
 			<div class="col-11 pb-3">
-				<textarea class="form-control" placeholder="댓글을 작성하세요" id="reply" rows="2"></textarea>
+				<textarea class="form-control" placeholder="댓글을 작성하세요" id="reply" rows="2" oninput="resize('reply')"></textarea>
 			</div>
 		</div>
 		<div class="row d-flex justify-content-center">
@@ -210,8 +233,10 @@
 	const modal = new bootstrap.Modal(document.getElementById('exampleModal'));
 	const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
 
-	const urlParams = new URLSearchParams(window.location.search);
-    const no = urlParams.get('no');
+	let urlParams;
+    let no;
+	let replyNo;
+	let typeSwitch;
 
 	const editor = toastui.Editor.factory({
 		el : document.querySelector(".toast-custom-viewer"),
@@ -230,6 +255,9 @@
 	});
 
 	window.onload = function() {
+		urlParams = new URLSearchParams(window.location.search);
+		no = urlParams.get('no');
+
     	getBoard();
 		getReply();
     }
@@ -270,31 +298,118 @@
 			window.location.href = "/error";
         })
         .then((data) => {
-			console.log('result: ', data);
-			const replyList = document.getElementById('reply_list');
+			if (data.length > 0){
+				const replyList = document.getElementById('reply_list');
+				const replyCount = document.getElementById('reply_count');
+				replyCount.textContent = data.length + '개의 댓글';
 
-			data.forEach(element => {
-				let row = document.createElement('div');
-				row.className = 'row';
-	
-				let col = document.createElement('div');
-				col.className = 'col';
-	
-				let author = document.createElement('p');
-				author.textContent = '작성자: ' + element.author;
-	
-				let content = document.createElement('p');
-				content.textContent = '내용: ' + element.content;
-	
-				let insDate = document.createElement('p');
-				insDate.textContent = '작성일: ' + element.insDate;
+				data.forEach((element, index, arr) => {
+					const insDateTime = new Date(element.insDate);
+					const insYear = insDateTime.getFullYear();
+					let insMonth = dateFmtConverter(insDateTime.getMonth() + 1);
+					let insDay = dateFmtConverter(insDateTime.getDate());
+					let insHour = dateFmtConverter(insDateTime.getHours());
+					let insMinute = dateFmtConverter(insDateTime.getMinutes());
 
-				col.appendChild(author);
-				col.appendChild(content);
-				col.appendChild(insDate);
-				row.appendChild(col);
-				replyList.appendChild(row);
-			})
+					let row = document.createElement('div');
+					row.className = 'row';
+					row.id = element.no;
+		
+					let col = document.createElement('div');
+					col.className = 'col';
+		
+					let author = document.createElement('h6');
+					author.textContent = element.author;
+					author.style.fontWeight = 'bold';
+					author.style.marginBottom = '0';
+		
+					let group = document.createElement('row');
+					group.className = 'row';
+
+					let insDateCol = document.createElement('col');
+					insDateCol.className = 'col-9';
+
+					let modDelCol = document.createElement('col');
+					modDelCol.className = 'col d-flex justify-content-end';
+
+					let insDate = document.createElement('small');
+					insDate.textContent = insYear + '.' + insMonth + '.' + insDay + ' ' + insHour + ':' + insMinute;
+
+					let modifyReply = document.createElement('button');
+					modifyReply.className = 'btn';
+					modifyReply.id = 'modify_reply';
+					modifyReply.type = 'button';
+					modifyReply.textContent = '수정';
+					modifyReply.style.width = '50px';
+					modifyReply.style.height = '25px';
+					modifyReply.style.fontSize = '12px';
+					modifyReply.style.lineHeight = '11px';
+					modifyReply.onclick = function() {
+						replyNo = element.no;
+						showModal('R', 'M');
+					};
+
+					let deleteReply = document.createElement('button');
+					deleteReply.className = 'btn';
+					deleteReply.id = 'delete_reply';
+					deleteReply.type = 'button';
+					deleteReply.textContent = '삭제';
+					deleteReply.style.width = '50px';
+					deleteReply.style.height = '25px';
+					deleteReply.style.fontSize = '12px';
+					deleteReply.style.lineHeight = '11px';
+					deleteReply.onclick = function() {
+						replyNo = element.no;
+						showModal('R', 'D');
+					}
+
+					let content = document.createElement('h6');
+					content.id = 'reply_content'
+					content.textContent = element.content;
+					content.style.overflowWrap = 'break-word';
+					content.style.marginTop = '1rem';
+					content.style.marginBottom = '1rem';
+
+					let aboutModifyBtn = document.createElement('div');
+					aboutModifyBtn.className = 'row';
+					aboutModifyBtn.id = 'about_modify_btn';
+
+					// let reReply = document.createElement('button');
+					// reReply.className = 'btn';
+					// reReply.type = 'button';
+					// reReply.textContent = '답글 달기';
+					// reReply.style.marginBottom = '1rem';
+					// reReply.onclick = function(){
+					// 	createRereply('rereply_textarea');
+					// }
+
+					// let reReplyTextarea = document.createElement('div');
+					// reReplyTextarea.className = 'row';
+					// reReplyTextarea.id = 'rereply_textarea';
+
+					let hr = document.createElement('hr');
+					hr.style.color = '#BDBDBD';
+
+					insDateCol.appendChild(insDate);
+					modDelCol.appendChild(modifyReply);
+					modDelCol.appendChild(deleteReply);
+					
+					group.appendChild(insDateCol);
+					group.appendChild(modDelCol);
+
+					col.appendChild(author);
+					col.appendChild(group);
+					col.appendChild(content);
+					col.appendChild(aboutModifyBtn);
+					// col.appendChild(reReply);
+					// col.appendChild(reReplyTextarea);
+					row.appendChild(col);
+					if (index !== arr.length - 1) {
+						row.appendChild(hr);
+					}
+					replyList.appendChild(row);
+				})
+			}
 		})
 		.catch((error) => {
           	console.error("Error:", error);
@@ -333,30 +448,33 @@
 		updDate.textContent = '마지막 수정일 ' + updYear + "." + updMonth + "." + updDay + " " + updHour + ":" + updMinute;
 	}
 
-	function showModal(type){
+	function showModal(swtch, type){
 		let message;
+		typeSwitch = swtch;
+		
 		if(type === 'M'){
 			message = '수정 하기';
 		} else {
 			message = '삭제 하기';
 		}
+
 		document.getElementById('exampleModalLabel').textContent = message;
-			modal.show();
-			document.getElementById('pwd-value').focus();
+		modal.show();
+		document.getElementById('pwd-value').focus();
 	}
 
 	function pwdValidity(){
 		let type;
-
+		
 		if(document.getElementById('exampleModalLabel').innerText === '수정 하기') {
 			type = 'M';
-
+			
 		} else {
 			type = 'D';
 		}
-
+		
 		const pwd = document.getElementById('pwd-value').value;
-
+		
 		if (pwd.length < 1 || /^\s*$/.test(pwd)) {
             const pwdBox = document.getElementById('pwd-box');
 
@@ -372,11 +490,15 @@
 				pwdBox.appendChild(feedback);
 			}
         } else {
-			findPwd(pwd, type);
+			if (typeSwitch === 'B'){
+				boardPwdAthnt(pwd, type);
+			} else {
+				replyPwdAthnt(pwd, type);
+			}
 		}
 	}
 
-	function findPwd(pwd, type){
+	function boardPwdAthnt(pwd, type) {
 		const formData = { no : no, boardPwd : pwd };
 		fetch("/board/pwdCheck", {
             method : 'POST',
@@ -396,71 +518,100 @@
 			if (data) {
 				// const modal = new bootstrap.Modal(document.getElementById('exampleModal'));
 				if (type === 'D'){
-					const modal = document.getElementById('deleteModal');
-
-					let modalDialog = document.createElement('div');
-					modalDialog.className = 'modal-dialog modal-dialog-centered';
-
-					let modalContent = document.createElement('div');
-					modalContent.className = 'modal-content';
-
-					let modalHeader = document.createElement('div');
-					modalHeader.className = 'modal-header';
-
-					let modalTitle = document.createElement('h5');
-					modalTitle.className = 'modal-title';
-					modalTitle.id = 'deleteModalLabel';
-					modalTitle.textContent = '안내';
-
-					let btnClose = document.createElement('button');
-					btnClose.type = 'button';
-					btnClose.className = 'btn-close';
-					btnClose.setAttribute('data-bs-dismiss', 'modal');
-					btnClose.setAttribute('aria-label', 'Close');
-
-					let modalBody = document.createElement('div');
-					modalBody.className = 'modal-body';
-
-					let p = document.createElement('p');
-					p.textContent = '삭제 하시겠습니까?';
-
-					let modalFooter = document.createElement('div');
-					modalFooter.className = 'modal-footer';
-
-					let btnCancel = document.createElement('button');
-					btnCancel.type = 'button';
-					btnCancel.className = 'btn btn-secondary';
-					btnCancel.setAttribute('data-bs-dismiss', 'modal');
-					btnCancel.textContent = '취소';
-
-					let btnSubmit = document.createElement('button');
-					btnSubmit.type = 'button';
-					btnSubmit.className = 'btn btn-primary';
-					btnSubmit.onclick = function() {
+					const deleteBtn = document.getElementById('deleteBtn');
+					deleteBtn.onclick = function() {
 						deleteBoard(pwd);
-					};
-					btnSubmit.textContent = '확인';
-
-					modalHeader.appendChild(modalTitle);
-					modalHeader.appendChild(btnClose);
-
-					modalBody.appendChild(p);
-
-					modalFooter.appendChild(btnCancel);
-					modalFooter.appendChild(btnSubmit);
-
-					modalContent.appendChild(modalHeader);
-					modalContent.appendChild(modalBody);
-					modalContent.appendChild(modalFooter);
-
-					modalDialog.appendChild(modalContent);
-
-					modal.appendChild(modalDialog);
-
-					const btModal = new bootstrap.Modal(modal);
-					btModal.show();
+					}
+					deleteModal.show();
 				} else {
 					window.location.href = "/board/modify?no=" + no;
+				}
+			} else {
+				alert('비밀번호를 확인 해 주세요.');
+			}
+        })
+        .catch((error) => {
+            console.error("Error:", error);
+        });
+	}
+
+	function replyPwdAthnt(pwd, type) {
+		const formData = { no : replyNo, replyPwd : pwd };
+		fetch("/reply/pwdCheck", {
+            method : 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+			body : JSON.stringify(formData),
+        })
+        .then((response) => {
+            if(response.ok){
+                return response.json();
+            }
+            window.location.href = "/error";
+        })
+        .then((data) => {
+			modal.hide();
+			if (data) {
+				if (type === 'D') {
+					const deleteBtn = document.getElementById('deleteBtn');
+					deleteBtn.onclick = function() {
+						deleteReply(pwd);
+					}
+					deleteModal.show();
+				} else {
+					let modifyReply = document.getElementById('modify_reply');
+					modifyReply.disabled = true;
+					let deleteReply = document.getElementById('delete_reply');
+					deleteReply.disabled = true;
+
+					let replyContent = document.getElementById('reply_content');
+					let replyContentModify = document.createElement('textarea');
+					replyContentModify.className = 'form-control';
+					replyContentModify.rows = '2';
+					replyContentModify.style.resize = 'none';
+					replyContentModify.style.overflow = 'hidden';
+
+					replyContentModify.value = replyContent.textContent;
+					
+					replyContentModify.id = replyContent.id;
+					replyContent.parentNode.replaceChild(replyContentModify, replyContent);
+					
+					replyContentModify.addEventListener('input', () => {
+						resize(replyContentModify.id);
+					})
+					resize(replyContentModify.id);
+
+					let aboutModifyBtn = document.getElementById('about_modify_btn');
+					let col = document.createElement('div');
+					col.className = 'col';
+
+					let cancel = document.createElement('button');
+					cancel.type = 'button';
+					cancel.className = 'btn btn-outline-secondary';
+					cancel.textContent = '취소';
+					cancel.onclick = function() {
+						while (aboutModifyBtn.firstChild) {
+							aboutModifyBtn.removeChild(aboutModifyBtn.firstChild);
+						}
+
+						let originContent = document.getElementById('reply_content');
+						let h6 = document.createElement('h6');
+						h6.textContent = originContent.value;
+						h6.id = originContent.id;
+						originContent.parentNode.replaceChild(h6, originContent);
+
+						modifyReply.disabled = false;
+						deleteReply.disabled = false;
+					}
+
+					let save = document.createElement('button');
+					save.type = 'button';
+					save.className = 'btn btn-primary'
+					save.textContent = '수정';
+
+					col.append(cancel, save);
+					aboutModifyBtn.appendChild(col);
 				}
 			} else {
 				alert('비밀번호를 확인 해 주세요.');
@@ -490,6 +641,34 @@
         .then((data) => {
 			if(data.result){
 				window.location.href = "/board/list";
+			} else {
+				deleteModal.hide();
+				alert(data.message);
+			}
+		})
+		.catch((error) => {
+			console.error('Error: ', error);
+		});
+	}
+
+	function deleteReply(pwd) {
+		fetch("/reply/delete" ,{
+            method : 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+			// body : JSON.stringify(formData),
+        })
+        .then((response) => {
+            if(response.ok){
+                return response.json();
+            }
+            window.location.href = "/error";
+        })
+        .then((data) => {
+			if(data.result){
+				// window.location.href = "/board/list";
+				location.reload();
 			} else {
 				deleteModal.hide();
 				alert(data.message);
@@ -533,7 +712,6 @@
 		const pwd = document.getElementById('reply_pwd').value;
 
 		if (replyValidity(replyAuthor, reply, pwd)){
-			console.log('작성자: ', replyAuthor);
 			const formData = { author: replyAuthor, content: reply, boardNo:no, replyPwd: pwd };
 			fetch("/reply/save" ,{
 				method : 'POST',
@@ -604,5 +782,39 @@
         col.appendChild(wrapper);
         alertRow.appendChild(col);
     }
+
+	function resize (id){
+		const element = document.getElementById(id);
+		element.style.height = 'auto';
+		element.style.height = element.scrollHeight + 'px';
+	}
+
+	// function createRereply(id){
+	// 	let element = document.getElementById(id);
+
+	// 	let col = document.createElement('div');
+	// 	col.className = 'col';
+
+	// 	let card = document.createElement('div');
+	// 	card.className = 'card';
+
+	// 	let cardBody = document.createElement('div');
+	// 	cardBody.className = 'card-body';
+
+	// 	let textarea = document.createElement('textarea');
+	// 	textarea.className = 'form-control';
+	// 	textarea.id = 'rereply';
+	// 	textarea.placeholder = '댓글을 작성하세요.';
+	// 	textarea.rows = '2';
+	// 	textarea.style.resize = 'none';
+	// 	textarea.oninput = function() {
+	// 		resize('rereply');
+	// 	}
+
+	// 	cardBody.appendChild(textarea);
+	// 	card.appendChild(cardBody);
+	// 	col.appendChild(card);
+	// 	element.appendChild(col);
+	// }
 </script>
 </html>
